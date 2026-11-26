@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xì Dách Online</title>
+<style>
+  :root { --felt:#0f5132; --felt2:#0b3d26; --gold:#f4c542; --ink:#e9f2ec; --muted:#9fb8a9; --red:#e5484d; --green:#3fb950; --panel:#14261c; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { overflow-x:hidden; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#0a1a12; color:var(--ink); }
+  button { font:inherit; border:0; border-radius:8px; padding:9px 14px; cursor:pointer; background:var(--gold); color:#222; font-weight:600; }
+  button.sec { background:#2b4a3a; color:var(--ink); }
+  button.danger { background:#5a2326; color:#ffd7d9; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  input { font:inherit; padding:9px 10px; border-radius:8px; border:1px solid #2f5643; background:#0d2219; color:var(--ink); }
+  .center { max-width:360px; margin:12vh auto; padding:28px; background:var(--panel); border-radius:16px; display:flex; flex-direction:column; gap:12px; }
+  .center h1 { margin:0 0 6px; text-align:center; }
+  .note { font-size:13px; color:var(--muted); line-height:1.5; }
+  header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:10px 16px; background:#08140e; }
+  header b { color:var(--gold); }
+  .grid { display:grid; grid-template-columns: minmax(0,1fr) 340px; gap:14px; padding:14px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: minmax(0,1fr); padding:8px; } }
+  .table { background:#0d1f16; border-radius:20px; padding:12px; }
+  #ring { position:relative; width:100%; aspect-ratio: 16 / 11; min-height:540px; }
+  .felt { position:absolute; inset:15% 13%; border-radius:50%;
+          background: radial-gradient(ellipse at center, #17714a, var(--felt) 55%, var(--felt2));
+          border:14px solid #5a3b1e; box-shadow: inset 0 0 40px rgba(0,0,0,.55), 0 0 0 3px #2b1a0b, 0 12px 30px rgba(0,0,0,.6);
+          display:flex; align-items:center; justify-content:center; }
+  .center-box { width:62%; text-align:center; }
+  #status { font-weight:700; margin-bottom:8px; color:var(--gold); font-size:17px; text-shadow:0 1px 2px #000; }
+  .seat { position:absolute; transform:translate(-50%,-50%); width:168px; background:rgba(8,20,14,.92); border:2px solid #2f5643;
+          border-radius:14px; padding:7px 9px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.5); transition: left .4s, top .4s; }
+  .seat.me { border-color:var(--gold); width:200px; }
+  .seat.dealer { background:rgba(40,28,6,.95); border-color:#a8832a; }
+  .seat.active { box-shadow:0 0 0 3px var(--gold), 0 0 18px var(--gold); }
+  .seat .name { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .badge { font-size:11px; padding:1px 7px; border-radius:999px; background:#2b4a3a; margin-left:4px; font-weight:600; }
+  .badge.cai { background:var(--gold); color:#222; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; background:#666; }
+  .dot.on { background:var(--green); }
+  .cards { display:flex; gap:3px; margin:6px 0 4px; min-height:0; justify-content:center; }
+  .c { width:30px; height:43px; border-radius:5px; background:#fff; color:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-size:13px; line-height:1.05; box-shadow:0 2px 4px rgba(0,0,0,.4); flex-shrink:0; }
+  .seat.me .c { width:36px; height:52px; font-size:15px; }
+  .c.red { color:#c62828; }
+  .c.back { background: repeating-linear-gradient(45deg,#8b1e2b,#8b1e2b 4px,#a8323f 4px,#a8323f 8px); border:2px solid #fff; }
+  .label { font-size:12px; color:var(--muted); }
+  .delta { position:absolute; top:-12px; right:-8px; font-size:14px; padding:2px 8px; border-radius:999px; background:#000; }
+  .plus { color:var(--green); font-weight:700; } .minus { color:var(--red); font-weight:700; }
+  #actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
+  #betBox { display:flex; gap:6px; align-items:center; }
+  #betInput { width:72px; }
+  .hint { width:100%; text-align:center; font-size:12px; color:#cfe3d6; }
+  @media (max-width: 600px) {
+    #ring { aspect-ratio: 3 / 5; min-height:0; }
+    .felt { inset:13% 6%; border-width:9px; }
+    .center-box { width:80%; }
+    .seat { width:116px; padding:5px 6px; font-size:13px; }
+    .seat.me { width:150px; }
+    .c { width:22px; height:32px; font-size:11px; }
+    .seat.me .c { width:28px; height:40px; font-size:13px; }
+    button { padding:7px 10px; }
+  }
+  aside { display:flex; flex-direction:column; gap:14px; }
+  .panel { background:var(--panel); border-radius:14px; padding:12px 14px; }
+  .panel h3 { margin:0 0 8px; font-size:15px; color:var(--gold); }
+  .ledger table { width:100%; border-collapse:collapse; font-size:14px; }
+  .ledger td { padding:4px 2px; border-bottom:1px solid #22382c; }
+  .ledger td:last-child { text-align:right; }
+  .pay { font-size:14px; margin:4px 0; }
+  .hist { font-size:12px; color:var(--muted); margin:3px 0; }
+  #chatLog { height:260px; overflow-y:auto; font-size:14px; display:flex; flex-direction:column; gap:3px; margin-bottom:8px; }
+  #chatLog .sys { color:var(--muted); font-style:italic; font-size:12px; }
+  #chatLog .t { color:var(--muted); font-size:11px; margin-right:4px; }
+  #chatForm { display:flex; gap:6px; } #chatInput { flex:1; min-width:0; }
+  .ava { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#24463a;
+         font-size:17px; line-height:1; overflow:hidden; flex-shrink:0; margin-right:6px; border:2px solid #3d6b55; }
+  .ava img { width:100%; height:100%; object-fit:cover; }
+  .seat.me .ava { width:34px; height:34px; font-size:22px; }
+  .ava.sm { width:22px; height:22px; font-size:14px; margin-right:0; border-width:1px; }
+  .seat .name { display:flex; align-items:center; justify-content:center; }
+  .seat .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .picker { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .picker .pick { width:44px; height:44px; border-radius:50%; padding:0; background:#24463a; font-size:24px; border:3px solid transparent; overflow:hidden; }
+  .picker .pick.sel { border-color:var(--gold); }
+  .picker .pick img { width:100%; height:100%; object-fit:cover; display:block; }
+  #avaModal { position:fixed; inset:0; background:#000b; display:flex; align-items:center; justify-content:center; z-index:8; }
+  #avaModal .center { margin:0 16px; }
+  #chatLog .msg { display:flex; gap:6px; align-items:flex-start; }
+  #chatLog .closing { background:#3a2f0b; color:#ffe08a; padding:6px 8px; border-radius:8px; font-size:13px; border-left:3px solid var(--gold); }
+  #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#000c; padding:10px 16px; border-radius:10px; display:none; z-index:9; }
+</style>
+</head>
+<body>
+
+<div id="login" class="center">
+  <h1>🃏 Xì Dách</h1>
+  <input id="nick" placeholder="Nickname" maxlength="16" autocomplete="off">
+  <input id="room" placeholder="Mã phòng" maxlength="20" value="phong1">
+  <div class="note" style="text-align:center">Chọn ava (hoặc 📷 để up ảnh)</div>
+  <div id="loginPicker" class="picker"></div>
+  <button id="joinBtn">Vào chơi</button>
+  <div class="note" id="modeNote"></div>
+</div>
+
+<div id="game" hidden>
+  <header>
+    <div>Phòng <b id="roomName"></b> · Bạn là <b id="meName"></b></div>
+    <div style="display:flex;gap:8px">
+      <button class="sec" id="avaBtn">🐾 Đổi ava</button>
+      <button class="sec" id="copyBtn">📋 Copy link mời</button>
+      <button class="sec" id="leaveBtn">Thoát</button>
+    </div>
+  </header>
+  <div class="grid">
+    <section class="table">
+      <div id="ring">
+        <div class="felt">
+          <div class="center-box">
+            <div id="status"></div>
+            <div id="actions">
+              <div id="betBox"><span>Cược</span><input id="betInput" type="number" min="1" step="1"><button id="readyBtn"></button></div>
+              <span id="btns" style="display:contents"></span>
+              <div class="hint" id="hint"></div>
+            </div>
+          </div>
+        </div>
+        <div id="seats"></div>
+      </div>
+    </section>
+    <aside>
+      <div class="panel ledger"><h3>📒 Sổ điểm</h3><div id="ledger"></div></div>
+      <div class="panel"><h3>💬 Chat</h3>
+        <div id="chatLog"></div>
+        <form id="chatForm"><input id="chatInput" maxlength="200" placeholder="Nhắn gì đó..." autocomplete="off"><button>Gửi</button></form>
+      </div>
+    </aside>
+  </div>
+</div>
+<div id="avaModal" hidden>
+  <div class="center">
+    <h3 style="margin:0;text-align:center">Chọn ava</h3>
+    <div id="modalPicker" class="picker"></div>
+    <button class="sec" id="avaClose">Xong</button>
+  </div>
+</div>
+<input type="file" id="avaFile" accept="image/*" hidden>
+<div id="toast"></div>
+
+<script type="module">
+// =====================================================================
+// 1) FIREBASE CONFIG — paste your config from Firebase console here.
+//    Leave databaseURL empty to run in LOCAL TEST MODE (tabs on one PC).
+// =====================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDYwSiG4hgC5Q8kzL54E9PdodKYNJAW9XU",
+  authDomain: "xidach-53911.firebaseapp.com",
+  databaseURL: "https://xidach-53911-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "xidach-53911",
+  appId: "1:795800338178:web:b1c9ac2576260fcbea0c1b"
+};
+
+// =====================================================================
+// 2) GAME RULES — tweak to match your group's house rules
+// =====================================================================
+const RULES = {
+  PLAYER_MIN: 16,          // người chơi phải đủ 16 mới được dằn
+  DEALER_MIN: 15,          // nhà cái phải đủ 15 mới được lật
+  MAX_CARDS: 5,            // ngũ linh
+  MULT: { xiban: 2, xidach: 2, ngulinh: 2, normal: 1 },  // hệ số ăn/thua
+  DEFAULT_BET: 10,
+};
+
+// =====================================================================
+// 3) BACKEND: Firebase Realtime Database, or localStorage for testing
+// =====================================================================
+const USE_FIREBASE = !!firebaseConfig.databaseURL;
+const clean = v => v === undefined ? null : JSON.parse(JSON.stringify(v));
+let api;
+
+if (USE_FIREBASE) {
+  const V = "10.12.2";
+  const fb = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+  const d = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-database.js`);
+  const db = d.getDatabase(fb.initializeApp(firebaseConfig));
+  api = {
+    on(path, cb, limit) { let r = d.ref(db, path); if (limit) r = d.query(r, d.limitToLast(limit)); return d.onValue(r, s => cb(s.val())); },
+    get: async p => (await d.get(d.ref(db, p))).val(),
+    set: (p, v) => d.set(d.ref(db, p), v),
+    update: (p, v) => d.update(d.ref(db, p), v),
+    push: (p, v) => d.push(d.ref(db, p), v),
+    tx: (p, fn) => d.runTransaction(d.ref(db, p), fn),
+    presence(p, onVal, offVal) {
+      const r = d.ref(db, p);
+      d.onValue(d.ref(db, ".info/connected"), s => {
+        if (s.val()) d.onDisconnect(r).update(offVal).then(() => d.update(r, onVal));
+      });
+    },
+  };
+} else {
+  api = makeLocalApi();
+}
+
+function makeLocalApi() {
+  const KEY = "xidach_local_db", listeners = [];
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const parts = p => p.split("/").filter(Boolean);
+  const get = (t, p) => parts(p).reduce((o, k) => (o == null ? undefined : o[k]), t);
+  const put = (t, p, v) => {
+    const ks = parts(p); let o = t;
+    for (let i = 0; i < ks.length - 1; i++) { if (typeof o[ks[i]] !== "object" || o[ks[i]] === null) o[ks[i]] = {}; o = o[ks[i]]; }
+    const last = ks.at(-1);
+    if (v === null || v === undefined) delete o[last]; else o[last] = clean(v);
+  };
+  const notify = () => { const t = load(); listeners.forEach(l => l(t)); };
+  const save = t => { localStorage.setItem(KEY, JSON.stringify(t)); notify(); };
+  window.addEventListener("storage", e => { if (e.key === KEY) notify(); });
+  const self = {
+    on(path, cb, limit) {
+      let last;
+      const l = t => {
+        let v = get(t, path);
+        if (limit && v && typeof v === "object") v = Object.fromEntries(Object.keys(v).sort().slice(-limit).map(k => [k, v[k]]));
+        const s = JSON.stringify(v ?? null);
+        if (s !== last) { last = s; cb(clean(v)); }
+      };
+      listeners.push(l); l(load());
+    },
+    get: async p => clean(get(load(), p)),
+    set: async (p, v) => { const t = load(); put(t, p, v); save(t); },
+    update: async (p, obj) => { const t = load(); for (const [k, v] of Object.entries(obj)) put(t, p + "/" + k, v); save(t); },
+    push: async (p, v) => self.set(p + "/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), v),
+    tx: async (p, fn) => { const t = load(); const nv = fn(clean(get(t, p))); if (nv !== undefined) { put(t, p, nv); save(t); } },
+    presence(p, onVal, offVal) { window.addEventListener("beforeunload", () => self.update(p, offVal)); self.update(p, onVal); },
+  };
+  return self;
+}
+
+// =====================================================================
+// 4) CARD LOGIC (Vietnamese xì dách rules)
+// =====================================================================
+const SUITS = ["♠", "♣", "♦", "♥"];
+const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+const rankOf = c => c.slice(0, -1);
+const TEN = ["10", "J", "Q", "K"];
+
+function newDeck() {
+  const d = [];
+  for (const s of SUITS) for (const r of RANKS) d.push(r + s);
+  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  return d;
+}
+
+// Ace = 1/10/11 with 2 cards, 1/10 with 3 cards, 1 with 4–5 cards
+function score(cards) {
+  const n = cards.length;
+  let base = 0, aces = 0;
+  for (const c of cards) { const r = rankOf(c); if (r === "A") { aces++; base += 1; } else base += TEN.includes(r) ? 10 : +r; }
+  const extras = n <= 2 ? [0, 9, 10] : n === 3 ? [0, 9] : [0];
+  let sums = [base];
+  for (let i = 0; i < aces; i++) sums = sums.flatMap(s => extras.map(e => s + e));
+  const ok = sums.filter(s => s <= 21);
+  return ok.length ? Math.max(...ok) : Math.min(...sums);
+}
+
+function classify(cards, min) {
+  const n = cards.length, rs = cards.map(rankOf);
+  if (n === 2 && rs[0] === "A" && rs[1] === "A") return { type: "xiban", rank: 4, pts: 21, label: "Xì bàn 🔥" };
+  if (n === 2 && rs.includes("A") && rs.some(r => TEN.includes(r))) return { type: "xidach", rank: 3, pts: 21, label: "Xì dách ⭐" };
+  const p = score(cards);
+  if (p > 21) return { type: "quac", rank: 0, pts: p, label: `Quắc (${p})` };
+  if (n >= RULES.MAX_CARDS) return { type: "ngulinh", rank: 2, pts: p, label: `Ngũ linh (${p})` };
+  if (p < min) return { type: "non", rank: 0, pts: p, label: `Non (${p})` };
+  return { type: "normal", rank: 1, pts: p, label: `${p} điểm` };
+}
+
+// Returns signed multiplier from the PLAYER's point of view (+ win, − lose, 0 draw)
+function settle(p, d) {
+  const M = RULES.MULT;
+  if (p.rank >= 2 || d.rank >= 2) {
+    if (p.type === "quac" || p.type === "non") return -(M[d.type] || 1);
+    if (d.type === "quac" || d.type === "non") return M[p.type];
+    if (p.rank > d.rank) return M[p.type];
+    if (p.rank < d.rank) return -M[d.type];
+    return 0;
+  }
+  if (p.type === "non") return -1;
+  if (p.type === "quac") return d.type === "quac" ? 0 : -1;
+  if (d.type === "quac" || d.type === "non") return 1;
+  return Math.sign(p.pts - d.pts);
+}
+
+// =====================================================================
+// 5) GAME STATE + ACTIONS (all writes go through transactions)
+// =====================================================================
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const keyify = s => s.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g, "_").slice(0, 24);
+const fmt = n => (n > 0 ? "+" : "") + n;
+const sid = sessionStorage.xd_sid || (sessionStorage.xd_sid = Math.random().toString(36).slice(2));
+
+let me = null, myName = "", room = "", gamePath = "", G = null, PLAYERS = {}, CHAT = null, presenceVal = null;
+
+// ---- Avatars: cute animal emoji, or an uploaded photo shrunk to 96×96 JPEG ----
+const ANIMALS = ["🐱", "🐶", "🐰", "🐼", "🦊", "🐻", "🐨", "🐸", "🐧", "🐯", "🐹", "🐷", "🐵", "🐥", "🦄", "🐙"];
+const isImg = a => typeof a === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(a);
+let myAva = localStorage.xd_ava || ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+const avaHtml = (a, cls = "") => `<span class="ava ${cls}">${isImg(a) ? `<img src="${a}" alt="">` : esc(a || "🙂")}</span>`;
+
+function renderPickers() {
+  const html = ANIMALS.map(a => `<button type="button" class="pick ${a === myAva ? "sel" : ""}" data-ava="${a}">${a}</button>`).join("")
+    + (isImg(myAva) ? `<button type="button" class="pick sel"><img src="${myAva}" alt=""></button>` : "")
+    + `<button type="button" class="pick" data-upload="1" title="Tải ảnh lên">📷</button>`;
+  $("#loginPicker").innerHTML = html; $("#modalPicker").innerHTML = html;
+}
+function fileToAva(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = 96, c = document.createElement("canvas"), m = Math.min(img.width, img.height);
+      c.width = c.height = s;
+      c.getContext("2d").drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, s, s);
+      URL.revokeObjectURL(img.src);
+      res(c.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function setAva(a) {
+  myAva = a; localStorage.xd_ava = a; renderPickers();
+  if (me) { presenceVal.ava = a; await api.update(`rooms/${room}/players/${me}`, { ava: a }); }
+}
+
+function norm(g) {
+  g.bets ||= {}; g.hands ||= {}; g.deck ||= []; g.balances ||= {}; g.names ||= {}; g.results ||= {}; g.history ||= [];
+  for (const h of Object.values(g.hands)) h.cards ||= [];
+  return g;
+}
+const online = p => !!PLAYERS[p]?.online;
+const nameOf = (p, g = G) => PLAYERS[p]?.name || g?.names?.[p] || p;
+const roundPlayers = g => Object.keys(g.hands).filter(p => p !== g.dealer);
+const allDone = g => roundPlayers(g).every(p => g.hands[p].done);
+
+function act(fn) {
+  return api.tx(gamePath, cur => {
+    if (cur === null) return cur;                 // cache not ready → Firebase retries with server data
+    const g = norm(cur);
+    if (fn(g) === false) return;                  // abort
+    return clean(g);
+  });
+}
+
+function finish(g) {
+  const d = g.dealer, dc = classify(g.hands[d].cards, RULES.DEALER_MIN);
+  const res = {}, lines = [];
+  let dsum = 0;
+  for (const p of roundPlayers(g)) {
+    const h = g.hands[p], pc = classify(h.cards, RULES.PLAYER_MIN);
+    const delta = settle(pc, dc) * h.bet;
+    g.balances[p] = (g.balances[p] || 0) + delta;
+    dsum -= delta;
+    res[p] = { label: pc.label, delta };
+    lines.push(`${nameOf(p, g)} ${fmt(delta)}`);
+  }
+  g.balances[d] = (g.balances[d] || 0) + dsum;
+  res[d] = { label: dc.label, delta: dsum };
+  g.results = res;
+  g.phase = "result";
+  g.history = [{ round: g.round, dealer: nameOf(d, g), text: lines.join(", "), dsum }, ...g.history].slice(0, 10);
+}
+
+const A = {
+  ensure: () => api.tx(gamePath, cur => {
+    const g = norm(cur || { phase: "betting", dealer: me, round: 0 });
+    g.names[me] = myName;
+    g.balances[me] ??= 0;
+    if (!g.dealer) g.dealer = me;
+    return clean(g);
+  }),
+  takeDealer: () => act(g => {
+    if (g.phase === "playing") return false;
+    g.dealer = me; delete g.bets[me];
+  }),
+  ready: bet => act(g => {
+    if (g.phase === "playing" || me === g.dealer) return false;
+    if (bet) g.bets[me] = bet; else delete g.bets[me];
+  }),
+  deal: () => act(g => {
+    if (me !== g.dealer || g.phase === "playing") return false;
+    const ps = Object.keys(g.bets).filter(p => p !== g.dealer && online(p));
+    if (!ps.length) return false;
+    const deck = newDeck(), order = [...ps, g.dealer], hands = {};
+    for (const p of order) { hands[p] = { cards: [], bet: p === g.dealer ? 0 : g.bets[p], done: false }; g.names[p] = nameOf(p, g); g.balances[p] ??= 0; }
+    for (let k = 0; k < 2; k++) for (const p of order) hands[p].cards.push(deck.pop());
+    Object.assign(g, { deck, hands, results: {}, phase: "playing", round: g.round + 1 });
+    for (const p of ps) if (classify(hands[p].cards, RULES.PLAYER_MIN).rank >= 3) hands[p].done = true;
+    if (classify(hands[g.dealer].cards, RULES.DEALER_MIN).rank >= 3) finish(g);   // cái có xì → lật luôn
+  }),
+  hit: () => act(g => {
+    const h = g.hands[me], isD = me === g.dealer;
+    if (g.phase !== "playing" || !h || h.done || h.cards.length >= RULES.MAX_CARDS) return false;
+    if (isD && !allDone(g)) return false;
+    h.cards.push(g.deck.pop());
+    const c = classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN);
+    if (c.type === "quac" || h.cards.length >= RULES.MAX_CARDS) { if (isD) finish(g); else h.done = true; }
+  }),
+  stand: () => act(g => {
+    const h = g.hands[me], isD = me === g.dealer;
+    if (g.phase !== "playing" || !h || h.done) return false;
+    if (score(h.cards) < (isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN)) return false;
+    if (isD) { if (!allDone(g)) return false; finish(g); } else h.done = true;
+  }),
+  forceAll: () => act(g => {
+    if (me !== g.dealer || g.phase !== "playing") return false;
+    for (const p of roundPlayers(g)) g.hands[p].done = true;
+  }),
+  next: () => act(g => {
+    if (g.phase !== "result") return false;
+    Object.assign(g, { phase: "betting", hands: {}, deck: [], results: {} });
+    for (const p of Object.keys(g.bets)) if (!online(p)) delete g.bets[p];
+  }),
+  // Chốt sổ: snapshot "ai trả ai" into closingText, then zero the ledger
+  closeBook: () => act(g => {
+    closingText = null;
+    if (g.phase === "playing") return false;
+    const pays = settlements(g.balances);
+    if (!pays.length) return false;
+    closingText = pays.map(([a, b, n]) => `${nameOf(a, g)} → ${nameOf(b, g)}: ${n}`).join(" · ");
+    for (const p of Object.keys(g.balances)) g.balances[p] = 0;
+    g.history = [];
+  }),
+};
+let closingText = null;
+
+function settlements(bal) {
+  const cred = [], debt = [], out = [];
+  for (const [p, v] of Object.entries(bal)) { if (v > 0) cred.push([p, v]); else if (v < 0) debt.push([p, -v]); }
+  cred.sort((a, b) => b[1] - a[1]); debt.sort((a, b) => b[1] - a[1]);
+  let i = 0, j = 0;
+  while (i < debt.length && j < cred.length) {
+    const amt = Math.min(debt[i][1], cred[j][1]);
+    out.push([debt[i][0], cred[j][0], amt]);
+    debt[i][1] -= amt; cred[j][1] -= amt;
+    if (!debt[i][1]) i++; if (!cred[j][1]) j++;
+  }
+  return out;
+}
+
+// =====================================================================
+// 6) RENDERING
+// =====================================================================
+function cardHtml(c, hidden) {
+  if (hidden) return `<div class="c back"></div>`;
+  const s = c.slice(-1), red = s === "♥" || s === "♦";
+  return `<div class="c ${red ? "red" : ""}"><span>${esc(rankOf(c))}</span><span>${s}</span></div>`;
+}
+
+function seatHtml(p, g, pos) {
+  const isD = p === g.dealer, h = g.hands[p], res = g.results[p];
+  const active = g.phase === "playing" && h && (isD ? allDone(g) : !h.done);
+  const showFace = p === me || g.phase === "result";
+  let info = "";
+  if (g.phase === "betting" || (g.phase === "result" && !h)) {
+    info = isD ? "Nhà cái" : g.bets[p] ? `✅ Sẵn sàng · cược ${g.bets[p]}` : "Chưa sẵn sàng";
+  } else if (h) {
+    if (g.phase === "result" && res) info = esc(res.label);
+    else {
+      const mine = p === me ? ` · ${esc(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN).label)}` : "";
+      info = (isD ? (allDone(g) ? "🎴 Đang rút" : "Chờ người chơi") : h.done ? "✋ Đã dằn" : "🎴 Đang rút") + (isD ? "" : ` · cược ${h.bet}`) + mine;
+    }
+  } else info = "Đang xem";
+  const delta = g.phase === "result" && res
+    ? `<span class="delta ${res.delta > 0 ? "plus" : res.delta < 0 ? "minus" : ""}">${res.delta ? fmt(res.delta) : "hòa"}</span>` : "";
+  return `<div class="seat ${isD ? "dealer" : ""} ${p === me ? "me" : ""} ${active ? "active" : ""}" style="${pos}">
+    ${delta}
+    <div class="name">${avaHtml(PLAYERS[p]?.ava)}<span class="nm"><span class="dot ${online(p) ? "on" : ""}"></span>${esc(nameOf(p, g))}</span>${isD ? '<span class="badge cai">CÁI</span>' : ""}${p === me ? '<span class="badge">bạn</span>' : ""}</div>
+    ${h ? `<div class="cards">${h.cards.map(c => cardHtml(c, !showFace)).join("")}</div>` : ""}
+    <div class="label">${info}</div>
+  </div>`;
+}
+
+// Place seats around the oval: me at the bottom, dealer at the top if I'm only watching
+function seatPositions(list) {
+  const mobile = innerWidth < 600, rx = mobile ? 31 : 41, ry = mobile ? 43 : 40;
+  const out = [], put = (p, deg) => { const a = deg * Math.PI / 180;
+    out.push([p, `left:${(50 + rx * Math.cos(a)).toFixed(2)}%;top:${(50 + ry * Math.sin(a)).toFixed(2)}%`]); };
+  const dealer = G.dealer, hasMe = list.includes(me), hasD = list.includes(dealer);
+  if (hasMe && hasD && me !== dealer) {
+    // me at bottom (90°), dealer at top (270°), others split on left and right arcs
+    const others = list.filter(p => p !== me && p !== dealer), half = Math.ceil(others.length / 2);
+    const left = others.slice(0, half), right = others.slice(half);
+    put(me, 90); put(dealer, 270);
+    left.forEach((p, k) => put(p, 90 + (k + 1) * 180 / (left.length + 1)));
+    right.forEach((p, k) => put(p, 270 + (k + 1) * 180 / (right.length + 1)));
+  } else {
+    // I'm the dealer → me at bottom; I'm watching → dealer at top
+    const first = hasMe ? me : dealer, base = hasMe ? 90 : 270;
+    const rest = list.filter(p => p !== first), seats = list.includes(first) ? [first, ...rest] : rest;
+    seats.forEach((p, k) => put(p, base + k * 360 / seats.length));
+  }
+  return out;
+}
+addEventListener("resize", () => render());
+
+function render() {
+  if (!G || !me) return;
+  const g = G;
+  const inHand = Object.keys(g.hands);
+  const watchers = Object.keys(PLAYERS).filter(p => online(p) && !inHand.includes(p) && p !== g.dealer);
+  const seatOrder = [g.dealer, ...inHand.filter(p => p !== g.dealer), ...watchers].filter(Boolean);
+  $("#seats").innerHTML = seatPositions([...new Set(seatOrder)]).map(([p, pos]) => seatHtml(p, g, pos)).join("");
+
+  const readyN = Object.keys(g.bets).filter(p => p !== g.dealer && online(p)).length;
+  const isD = me === g.dealer, h = g.hands[me];
+  let status = "", btns = "", hint = "";
+  $("#betBox").style.display = "none";
+
+  if (g.phase === "playing") {
+    status = `Ván #${g.round} · ${allDone(g) ? `Tới lượt cái (${esc(nameOf(g.dealer))})` : "Người chơi đang rút bài"}`;
+    if (isD) {
+      if (allDone(g)) {
+        const pts = score(h.cards);
+        btns = `<button data-a="hit" ${h.cards.length >= RULES.MAX_CARDS ? "disabled" : ""}>Rút bài</button>
+                <button data-a="stand" ${pts < RULES.DEALER_MIN ? "disabled" : ""}>Lật bài, tính tiền</button>`;
+        if (pts < RULES.DEALER_MIN) hint = `Cái cần ít nhất ${RULES.DEALER_MIN} điểm mới được lật.`;
+      } else {
+        btns = `<button class="sec" data-a="forceAll">Ép tất cả dằn</button>`;
+        hint = "Chờ người chơi rút xong. Ai treo máy thì bấm Ép tất cả dằn (dưới 16 = non, thua).";
+      }
+    } else if (h && !h.done) {
+      const pts = score(h.cards);
+      btns = `<button data-a="hit">Rút bài</button><button data-a="stand" ${pts < RULES.PLAYER_MIN ? "disabled" : ""}>Dằn</button>`;
+      if (pts < RULES.PLAYER_MIN) hint = `Chưa đủ ${RULES.PLAYER_MIN} điểm, phải rút thêm.`;
+    } else if (h) hint = "Đã dằn, chờ cái lật bài.";
+    else hint = "Ván đang chơi, bạn vào từ ván sau nhé.";
+  } else {
+    status = g.phase === "result" ? `Kết quả ván #${g.round}` : `Chờ đặt cược · ${readyN} người sẵn sàng`;
+    if (isD) {
+      btns = `<button data-a="deal" ${readyN ? "" : "disabled"}>Chia bài${g.phase === "result" ? " ván mới" : ""}</button>`;
+      if (!readyN) hint = "Chờ ít nhất 1 người bấm Sẵn sàng.";
+    } else {
+      $("#betBox").style.display = "flex";
+      const b = g.bets[me];
+      $("#readyBtn").textContent = b ? "Hủy sẵn sàng" : "Sẵn sàng";
+      $("#readyBtn").className = b ? "sec" : "";
+      if (document.activeElement !== $("#betInput")) $("#betInput").value = b || $("#betInput").value || RULES.DEFAULT_BET;
+      btns = `<button class="sec" data-a="takeDealer">Làm cái</button>`;
+      if (!online(g.dealer)) hint = "Nhà cái đang offline, ai đó bấm Làm cái nhé.";
+    }
+    if (g.phase === "result") btns += `<button class="sec" data-a="next">Dọn bàn</button>`;
+  }
+  $("#status").innerHTML = status;
+  $("#btns").innerHTML = btns;
+  $("#hint").textContent = hint;
+
+  // Ledger
+  const bal = Object.entries(g.balances).sort((a, b) => b[1] - a[1]);
+  const pays = settlements(g.balances);
+  $("#ledger").innerHTML = `
+    <table>${bal.map(([p, v]) => `<tr><td>${esc(nameOf(p))}</td><td class="${v > 0 ? "plus" : v < 0 ? "minus" : ""}">${fmt(v)}</td></tr>`).join("")}</table>
+    <div style="margin-top:10px;font-weight:600">Ai trả ai:</div>
+    ${pays.length ? pays.map(([a, b, n]) => `<div class="pay">${esc(nameOf(a))} → ${esc(nameOf(b))}: <b>${n}</b></div>`).join("") : '<div class="hist">Chưa ai nợ ai.</div>'}
+    ${g.history.length ? `<div style="margin-top:10px;font-weight:600">Lịch sử</div>` + g.history.map(x => `<div class="hist">#${x.round} (cái ${esc(x.dealer)} ${fmt(x.dsum)}): ${esc(x.text)}</div>`).join("") : ""}
+    <div style="margin-top:10px"><button data-a="closeBook" ${g.phase === "playing" || !pays.length ? "disabled" : ""}>📒 Chốt sổ</button></div>`;
+}
+
+function renderChat(v) {
+  CHAT = v;
+  const box = $("#chatLog");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.innerHTML = Object.keys(v || {}).sort().map(k => {
+    const m = v[k], t = new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (m.type === "close") return `<div class="closing">${esc(m.text)}</div>`;
+    if (!m.name) return `<div class="sys">${esc(m.text)}</div>`;
+    return `<div class="msg">${avaHtml(PLAYERS[m.pid]?.ava, "sm")}<div><span class="t">${t}</span><b>${esc(m.name)}:</b> ${esc(m.text)}</div></div>`;
+  }).join("");
+  if (atBottom) box.scrollTop = box.scrollHeight;
+}
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 2200); }
+const say = text => api.push(`rooms/${room}/chat`, { name: "", text, ts: Date.now() });
+
+// =====================================================================
+// 7) JOIN + EVENTS
+// =====================================================================
+async function join() {
+  const name = $("#nick").value.trim();
+  if (!name) return toast("Nhập nickname đã bệ hạ ơi");
+  room = keyify($("#room").value || "phong1") || "phong1";
+  me = "u_" + keyify(name); myName = name; gamePath = `rooms/${room}/game`;
+  localStorage.xd_nick = name;
+  const existing = await api.get(`rooms/${room}/players/${me}`);
+  if (existing?.online && existing.sid !== sid && !confirm(`"${name}" đang online ở chỗ khác. Vẫn vào bằng tên này?`)) return;
+
+  history.replaceState(null, "", `?r=${encodeURIComponent(room)}`);
+  $("#login").hidden = true; $("#game").hidden = false;
+  $("#roomName").textContent = room; $("#meName").textContent = name;
+
+  api.on(gamePath, v => { G = v ? norm(v) : null; render(); });
+  api.on(`rooms/${room}/players`, v => { PLAYERS = v || {}; render(); if (CHAT) renderChat(CHAT); });
+  api.on(`rooms/${room}/chat`, renderChat, 80);
+  presenceVal = { name, online: true, sid, ava: myAva };
+  api.presence(`rooms/${room}/players/${me}`, presenceVal, { online: false });
+  await A.ensure();
+  say(`${name} vào phòng`);
+}
+
+$("#modeNote").innerHTML = USE_FIREBASE
+  ? "🌐 Online qua Firebase. Gửi link phòng cho bạn bè là vào chơi chung được."
+  : "🧪 <b>Chế độ thử</b> (chưa có Firebase): mở nhiều tab trên cùng máy, mỗi tab một nickname để test.";
+$("#nick").value = localStorage.xd_nick || "";
+const qr = new URLSearchParams(location.search).get("r"); if (qr) $("#room").value = qr;
+$("#joinBtn").onclick = join;
+$("#nick").addEventListener("keydown", e => e.key === "Enter" && join());
+
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-a]")?.dataset.a;
+  if (!a) return;
+  if (a === "closeBook" && !confirm("Chốt sổ: lưu bảng ai trả ai vào chat rồi đưa sổ về 0?")) return;
+  A[a]?.().then(r => {
+    if (a === "takeDealer") say(`${myName} lên làm cái`);
+    if (a === "closeBook" && closingText && r?.committed !== false) {
+      const day = new Date().toLocaleString([], { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+      api.push(`rooms/${room}/chat`, { name: "", type: "close", text: `📒 ${myName} chốt sổ ${day} — ${closingText}`, ts: Date.now() });
+      closingText = null;
+    }
+  });
+});
+
+// Avatar picker events (login screen + in-game modal)
+document.addEventListener("click", e => {
+  const pick = e.target.closest("[data-ava]");
+  if (pick) return setAva(pick.dataset.ava);
+  if (e.target.closest("[data-upload]")) $("#avaFile").click();
+});
+$("#avaFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try { await setAva(await fileToAva(f)); toast("Đã đổi ava!"); } catch { toast("Ảnh này không đọc được, thử ảnh khác nhé"); }
+};
+$("#avaBtn").onclick = () => { renderPickers(); $("#avaModal").hidden = false; };
+$("#avaClose").onclick = () => $("#avaModal").hidden = true;
+$("#avaModal").onclick = e => { if (e.target.id === "avaModal") $("#avaModal").hidden = true; };
+renderPickers();
+$("#readyBtn").onclick = () => {
+  if (G?.bets?.[me]) return A.ready(0);
+  const bet = Math.floor(+$("#betInput").value);
+  if (!(bet >= 1)) return toast("Cược phải ≥ 1");
+  A.ready(bet);
+};
+$("#chatForm").onsubmit = e => {
+  e.preventDefault();
+  const text = $("#chatInput").value.trim(); if (!text) return;
+  api.push(`rooms/${room}/chat`, { pid: me, name: myName, text, ts: Date.now() });
+  $("#chatInput").value = "";
+};
+$("#copyBtn").onclick = () => navigator.clipboard.writeText(location.href).then(() => toast("Đã copy link, gửi cho bạn bè nhé!"));
+$("#leaveBtn").onclick = () => { api.update(`rooms/${room}/players/${me}`, { online: false }); location.href = location.pathname; };
+</script>
+</body>
+</html>
