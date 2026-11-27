@@ -2,65 +2,105 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Xì Dách Online</title>
 <style>
-  :root { --felt:#0f5132; --felt2:#0b3d26; --gold:#f4c542; --ink:#e9f2ec; --muted:#9fb8a9; --red:#e5484d; --green:#3fb950; --panel:#14261c; }
-  * { box-sizing: border-box; }
+  :root { --felt:#0f5132; --felt2:#0b3d26; --gold:#f4c542; --ink:#e9f2ec; --muted:#9fb8a9; --red:#ff5a5f; --green:#3fdc6a; --panel:#14261c; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
-  body { overflow-x:hidden; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#0a1a12; color:var(--ink); }
-  button { font:inherit; border:0; border-radius:8px; padding:9px 14px; cursor:pointer; background:var(--gold); color:#222; font-weight:600; }
+  html, body { overflow-x:hidden; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#0a1a12; color:var(--ink); }
+  button { font:inherit; border:0; border-radius:10px; padding:10px 14px; cursor:pointer; background:var(--gold); color:#222; font-weight:700; }
   button.sec { background:#2b4a3a; color:var(--ink); }
-  button.danger { background:#5a2326; color:#ffd7d9; }
   button:disabled { opacity:.4; cursor:not-allowed; }
-  input { font:inherit; padding:9px 10px; border-radius:8px; border:1px solid #2f5643; background:#0d2219; color:var(--ink); }
-  .center { max-width:360px; margin:12vh auto; padding:28px; background:var(--panel); border-radius:16px; display:flex; flex-direction:column; gap:12px; }
+  input { font:inherit; font-size:16px; padding:9px 10px; border-radius:10px; border:1px solid #2f5643; background:#0d2219; color:var(--ink); }
+  .center { max-width:360px; margin:10vh auto; padding:28px; background:var(--panel); border-radius:16px; display:flex; flex-direction:column; gap:12px; }
   .center h1 { margin:0 0 6px; text-align:center; }
   .note { font-size:13px; color:var(--muted); line-height:1.5; }
-  header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:10px 16px; background:#08140e; }
+  header { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 14px; background:#08140e; }
   header b { color:var(--gold); }
+  .hbtns { display:flex; gap:6px; }
   .grid { display:grid; grid-template-columns: minmax(0,1fr) 340px; gap:14px; padding:14px; }
-  @media (max-width: 860px) { .grid { grid-template-columns: minmax(0,1fr); padding:8px; } }
   .table { background:#0d1f16; border-radius:20px; padding:12px; }
-  #ring { position:relative; width:100%; aspect-ratio: 16 / 11; min-height:540px; }
-  .felt { position:absolute; inset:15% 13%; border-radius:50%;
+  #ring { position:relative; width:100%; aspect-ratio: 16 / 11; min-height:600px; }
+  .felt { position:absolute; inset:16% 14%; border-radius:50%;
           background: radial-gradient(ellipse at center, #17714a, var(--felt) 55%, var(--felt2));
           border:14px solid #5a3b1e; box-shadow: inset 0 0 40px rgba(0,0,0,.55), 0 0 0 3px #2b1a0b, 0 12px 30px rgba(0,0,0,.6);
           display:flex; align-items:center; justify-content:center; }
-  .center-box { width:62%; text-align:center; }
-  #status { font-weight:700; margin-bottom:8px; color:var(--gold); font-size:17px; text-shadow:0 1px 2px #000; }
-  .seat { position:absolute; transform:translate(-50%,-50%); width:168px; background:rgba(8,20,14,.92); border:2px solid #2f5643;
+  .center-box { width:66%; text-align:center; display:flex; flex-direction:column; gap:8px; align-items:center; }
+  #status { font-weight:700; color:var(--gold); font-size:16px; text-shadow:0 1px 2px #000; }
+  #turn { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; }
+  #turn .lead { width:100%; font-size:13px; color:#d8eadf; }
+  .chip { display:inline-flex; align-items:center; gap:4px; padding:3px 10px 3px 3px; border-radius:999px; background:rgba(0,0,0,.45);
+          font-weight:700; font-size:14px; border:2px solid var(--gold); animation: pulse 1.2s ease-in-out infinite; }
+  .chip .ava { margin:0; }
+  .myturn { font-size:20px; font-weight:800; color:#fff; background:linear-gradient(90deg,#d4a017,#f4c542); color:#2a1d00; padding:4px 14px; border-radius:999px; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform:scale(1.06); } }
+
+  .seat { position:absolute; transform:translate(-50%,-50%); width:190px; background:rgba(8,20,14,.93); border:2px solid #2f5643;
           border-radius:14px; padding:7px 9px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.5); transition: left .4s, top .4s; }
-  .seat.me { border-color:var(--gold); width:200px; }
-  .seat.dealer { background:rgba(40,28,6,.95); border-color:#a8832a; }
-  .seat.active { box-shadow:0 0 0 3px var(--gold), 0 0 18px var(--gold); }
-  .seat .name { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .badge { font-size:11px; padding:1px 7px; border-radius:999px; background:#2b4a3a; margin-left:4px; font-weight:600; }
+  .seat.me { border-color:var(--gold); width:260px; z-index:2; }
+  .seat.dealer { background:rgba(46,32,6,.96); border-color:#d4a017; }
+  .seat.dealer::before { content:"👑"; position:absolute; top:-26px; left:-14px; font-size:34px; transform:rotate(-18deg);
+          filter: drop-shadow(0 2px 3px rgba(0,0,0,.7)); }
+  .seat.active { box-shadow:0 0 0 3px var(--gold), 0 0 22px var(--gold); }
+  .seat .name { font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .seat .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .badge { font-size:11px; padding:1px 7px; border-radius:999px; background:#2b4a3a; margin-left:4px; font-weight:700; flex-shrink:0; }
   .badge.cai { background:var(--gold); color:#222; }
   .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; background:#666; }
   .dot.on { background:var(--green); }
-  .cards { display:flex; gap:3px; margin:6px 0 4px; min-height:0; justify-content:center; }
-  .c { width:30px; height:43px; border-radius:5px; background:#fff; color:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-size:13px; line-height:1.05; box-shadow:0 2px 4px rgba(0,0,0,.4); flex-shrink:0; }
-  .seat.me .c { width:36px; height:52px; font-size:15px; }
-  .c.red { color:#c62828; }
+
+  .cards { display:flex; margin:7px 0 4px; justify-content:center; }
+  .c { width:42px; height:60px; border-radius:6px; background:#fff; color:#111; display:flex; flex-direction:column; align-items:center; justify-content:center;
+       font-weight:800; font-size:18px; line-height:1.05; box-shadow:-2px 2px 5px rgba(0,0,0,.45); flex-shrink:0; border:1px solid #ccc; }
+  .c + .c { margin-left:-8px; }
+  .c span:last-child { font-size:1.15em; }
+  .seat.me .c { width:54px; height:78px; font-size:23px; border-radius:8px; }
+  .seat.me .c + .c { margin-left:-6px; }
+  .c.red { color:#d32f2f; }
   .c.back { background: repeating-linear-gradient(45deg,#8b1e2b,#8b1e2b 4px,#a8323f 4px,#a8323f 8px); border:2px solid #fff; }
-  .label { font-size:12px; color:var(--muted); }
-  .delta { position:absolute; top:-12px; right:-8px; font-size:14px; padding:2px 8px; border-radius:999px; background:#000; }
-  .plus { color:var(--green); font-weight:700; } .minus { color:var(--red); font-weight:700; }
-  #actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
-  #betBox { display:flex; gap:6px; align-items:center; }
-  #betInput { width:72px; }
-  .hint { width:100%; text-align:center; font-size:12px; color:#cfe3d6; }
-  @media (max-width: 600px) {
-    #ring { aspect-ratio: 3 / 5; min-height:0; }
-    .felt { inset:13% 6%; border-width:9px; }
-    .center-box { width:80%; }
-    .seat { width:116px; padding:5px 6px; font-size:13px; }
-    .seat.me { width:150px; }
-    .c { width:22px; height:32px; font-size:11px; }
-    .seat.me .c { width:28px; height:40px; font-size:13px; }
-    button { padding:7px 10px; }
+  .label { font-size:13px; color:#c3d6ca; }
+  .delta { position:absolute; top:-12px; right:-8px; font-size:14px; padding:2px 9px; border-radius:999px; background:#000; }
+  .plus { color:var(--green); font-weight:800; } .minus { color:var(--red); font-weight:800; }
+
+  /* big hand result label shown above the cards when a round ends */
+  .hl { font-weight:900; font-size:24px; line-height:1.1; margin:4px 0 0; letter-spacing:.5px; white-space:nowrap; }
+  .seat.me .hl { font-size:30px; }
+  .hl small { font-size:.55em; font-weight:800; }
+  .hl.normal { color:#fff; text-shadow: 0 2px 0 #000, 0 0 10px rgba(255,255,255,.45); }
+  .hl.quac, .hl.non { color:#7d8580; text-shadow: 0 1px 0 #000; }
+  .hl.quac .g { text-decoration: line-through 3px #9aa29d; }
+  .hl .g { display:inline-block; }
+  .hl.xidach .g, .hl.xiban .g, .hl.ngulinh .g {
+    background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+    animation: shine 1.6s linear infinite; }
+  .hl.xidach .g { background-image: linear-gradient(90deg,#fff6c2,#f4c542,#fff,#d4a017,#fff6c2); filter: drop-shadow(0 0 6px #f4c542) drop-shadow(0 2px 0 #4a3300); }
+  .hl.xiban .g { background-image: linear-gradient(90deg,#ffe27a,#ff7a18,#ff2d55,#ffb347,#ffe27a); filter: drop-shadow(0 0 8px #ff5a1f) drop-shadow(0 2px 0 #4a0f00); }
+  .hl.ngulinh .g { background-image: linear-gradient(90deg,#a5f3ff,#7c5cff,#ffffff,#36d1dc,#a5f3ff); filter: drop-shadow(0 0 7px #7c5cff) drop-shadow(0 2px 0 #1b1046); }
+  .hl.xidach, .hl.xiban, .hl.ngulinh { animation: pop .5s ease-out, pulse 1.4s ease-in-out .5s infinite; }
+  @keyframes shine { to { background-position: 200% center; } }
+  @keyframes pop { 0% { transform:scale(.3); opacity:0; } 70% { transform:scale(1.2); opacity:1; } 100% { transform:scale(1); } }
+
+  #floats { position:absolute; inset:0; pointer-events:none; z-index:5; }
+  .float { position:absolute; transform:translate(-50%,-50%); font-size:34px; font-weight:900; white-space:nowrap;
+           text-shadow: 0 0 6px #000, 0 2px 0 #000, 0 0 14px currentColor; animation: floatUp 2.6s ease-out forwards; }
+  .float.zero { color:#fff; font-size:26px; }
+  .float.big { font-size:44px; }
+  @keyframes floatUp {
+    0% { opacity:0; transform:translate(-50%,-30%) scale(.4); }
+    15% { opacity:1; transform:translate(-50%,-60%) scale(1.25); }
+    30% { transform:translate(-50%,-75%) scale(1); }
+    80% { opacity:1; }
+    100% { opacity:0; transform:translate(-50%,-180%) scale(1); }
   }
+
+  #actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
+  #actions button { font-size:16px; padding:11px 18px; }
+  #betBox { display:flex; gap:6px; align-items:center; }
+  #betInput { width:76px; }
+  .hint { width:100%; text-align:center; font-size:12px; color:#cfe3d6; }
+
   aside { display:flex; flex-direction:column; gap:14px; }
   .panel { background:var(--panel); border-radius:14px; padding:12px 14px; }
   .panel h3 { margin:0 0 8px; font-size:15px; color:var(--gold); }
@@ -72,23 +112,107 @@
   #chatLog { height:260px; overflow-y:auto; font-size:14px; display:flex; flex-direction:column; gap:3px; margin-bottom:8px; }
   #chatLog .sys { color:var(--muted); font-style:italic; font-size:12px; }
   #chatLog .t { color:var(--muted); font-size:11px; margin-right:4px; }
+  #chatLog .msg { display:flex; gap:6px; align-items:flex-start; }
+  #chatLog .closing { background:#3a2f0b; color:#ffe08a; padding:6px 8px; border-radius:8px; font-size:13px; border-left:3px solid var(--gold); }
   #chatForm { display:flex; gap:6px; } #chatInput { flex:1; min-width:0; }
-  .ava { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#24463a;
-         font-size:17px; line-height:1; overflow:hidden; flex-shrink:0; margin-right:6px; border:2px solid #3d6b55; }
+
+  .ava { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:#24463a;
+         font-size:18px; line-height:1; overflow:hidden; flex-shrink:0; margin-right:6px; border:2px solid #3d6b55; }
   .ava img { width:100%; height:100%; object-fit:cover; }
   .seat.me .ava { width:34px; height:34px; font-size:22px; }
   .ava.sm { width:22px; height:22px; font-size:14px; margin-right:0; border-width:1px; }
-  .seat .name { display:flex; align-items:center; justify-content:center; }
-  .seat .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
   .picker { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
   .picker .pick { width:44px; height:44px; border-radius:50%; padding:0; background:#24463a; font-size:24px; border:3px solid transparent; overflow:hidden; }
   .picker .pick.sel { border-color:var(--gold); }
   .picker .pick img { width:100%; height:100%; object-fit:cover; display:block; }
-  #avaModal { position:fixed; inset:0; background:#000b; display:flex; align-items:center; justify-content:center; z-index:8; }
-  #avaModal .center { margin:0 16px; }
-  #chatLog .msg { display:flex; gap:6px; align-items:flex-start; }
-  #chatLog .closing { background:#3a2f0b; color:#ffe08a; padding:6px 8px; border-radius:8px; font-size:13px; border-left:3px solid var(--gold); }
-  #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#000c; padding:10px 16px; border-radius:10px; display:none; z-index:9; }
+  #avaModal, .modal { position:fixed; inset:0; background:#000b; display:flex; align-items:center; justify-content:center; z-index:20; }
+  #avaModal .center, .modal .center { margin:0 16px; width:min(360px, 92vw); }
+  .modal h3 { margin:0; text-align:center; }
+
+  /* ---------- Lobby ---------- */
+  .lobby-wrap { max-width:980px; margin:0 auto; padding:16px; padding-bottom:40px; }
+  .lobby-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+  .lobby-top h2 { margin:0; font-size:22px; }
+  .tables { display:grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap:14px; }
+  .tcard { position:relative; border-radius:20px; padding:16px; cursor:pointer; min-height:150px; display:flex; flex-direction:column; gap:10px;
+           background: radial-gradient(ellipse at center, #17714a, var(--felt) 60%, var(--felt2)); border:6px solid #5a3b1e;
+           box-shadow: inset 0 0 26px rgba(0,0,0,.5), 0 6px 16px rgba(0,0,0,.5); transition: transform .15s; }
+  .tcard:hover { transform: translateY(-3px); }
+  .tcard.empty { filter: saturate(.45) brightness(.8); }
+  .tcard .tname { font-size:19px; font-weight:800; display:flex; align-items:center; gap:6px; text-shadow:0 1px 2px #000; }
+  .tcard .tname span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcard .count { position:absolute; top:12px; right:12px; background:#000a; border-radius:999px; padding:3px 10px; font-weight:800; font-size:14px; }
+  .tcard .count.live { color:var(--green); }
+  .tcard .avas { display:flex; flex-wrap:wrap; gap:4px; min-height:30px; }
+  .tcard .avas .ava { width:30px; height:30px; font-size:19px; margin:0; }
+  .tcard .meta { font-size:12px; color:#cfe3d6; margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+  .tcard .go { padding:7px 14px; }
+  .tcard .del { background:#5a2326; color:#ffd7d9; padding:6px 9px; }
+  .noTables { text-align:center; color:var(--muted); padding:40px 10px; grid-column: 1 / -1; }
+  #toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#000d; padding:10px 16px; border-radius:10px; display:none; z-index:30; }
+
+  #mobileBar, #peek, #mobileActions { display:none; }
+  body:not(.in-game) #mobileBar, body:not(.in-game) #mobileActions, body:not(.in-game) #peek { display:none !important; }
+
+  /* ===================== PHONE (iPhone etc.) ===================== */
+  @media (max-width: 700px) {
+    header { padding:6px 10px; padding-top:max(6px, env(safe-area-inset-top)); font-size:14px; }
+    header .lbl { display:none; }
+    header button { padding:7px 10px; }
+    .grid { display:block; padding:0; }
+    .table { border-radius:0; padding:0 4px; background:transparent; }
+    #ring { aspect-ratio:auto; min-height:430px; height: calc(100dvh - 46px - 62px - var(--act-h, 84px) - env(safe-area-inset-bottom) - env(safe-area-inset-top)); }
+    .felt { inset:15% 5% 17%; border-width:9px; }
+    .center-box { width:38%; gap:5px; }
+    .myturn { font-size:14px; padding:4px 10px; }
+    #turn .lead { font-size:11px; }
+    .chip { font-size:12px; padding:2px 8px 2px 2px; }
+    #mobileActions { display:flex; position:fixed; left:0; right:0; bottom:calc(58px + env(safe-area-inset-bottom)); z-index:12;
+                     min-height:70px; padding:6px 10px; align-items:center; justify-content:center; background:#08140e; }
+    #mobileActions #actions { width:100%; }
+    #mobileActions #actions button { flex:1 1 0; max-width:200px; font-size:15px; padding:12px 6px; white-space:nowrap; }
+    #mobileActions #actions { flex-wrap:nowrap; flex-direction:row; }
+    #mobileActions #actions > .hint { position:absolute; top:-18px; left:0; right:0; }
+    #mobileActions { position:fixed; }
+    #mobileActions #betBox { flex:0 0 auto; }
+    #mobileActions #betBox > span { display:none; }
+    #mobileActions #betBox button { flex:0 0 auto; padding:12px 12px; }
+    #mobileActions #betInput { width:58px; padding:9px 6px; text-align:center; }
+    #mobileActions #actions { gap:6px; }
+    #mobileActions .hint { font-size:11px; }
+    #status { font-size:14px; }
+    .chip { font-size:13px; }
+    #actions button { font-size:15px; padding:10px 14px; }
+    .seat { width:118px; padding:4px 5px; font-size:13px; border-radius:12px; }
+    .seat.me { width:min(92vw, 250px); }
+    .seat.dealer::before { top:-22px; left:-10px; font-size:28px; }
+    .seat .ava { width:22px; height:22px; font-size:14px; margin-right:4px; }
+    .seat.me .ava { width:28px; height:28px; font-size:18px; }
+    .badge { font-size:10px; padding:1px 5px; }
+    .c { width:34px; height:49px; font-size:15px; border-radius:5px; }
+    .c + .c { margin-left:-13px; }
+    .seat.me .c { width:50px; height:72px; font-size:21px; }
+    .seat.me .c + .c { margin-left:-8px; }
+    .label { font-size:11px; }
+    .float { font-size:28px; } .float.big { font-size:38px; }
+    .hl { font-size:19px; } .seat.me .hl { font-size:26px; }
+
+    /* chat + ledger become a bottom sheet */
+    aside { position:fixed; left:0; right:0; bottom:calc(58px + var(--act-h, 84px) + env(safe-area-inset-bottom)); max-height:52dvh; z-index:15;
+            background:#0b1a12; border-radius:18px 18px 0 0; padding:10px; box-shadow:0 -8px 30px rgba(0,0,0,.7); display:none; }
+    aside.open { display:flex; }
+    aside[data-show="chat"] .ledger, aside[data-show="ledger"] .chatpanel { display:none; }
+    aside .panel { flex:1; min-height:0; display:flex; flex-direction:column; overflow:auto; }
+    #chatLog { height:auto; flex:1; min-height:200px; }
+    #mobileBar { display:flex; position:fixed; left:0; right:0; bottom:0; z-index:16; gap:8px; padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+                 background:#08140e; border-top:1px solid #1f3a2c; }
+    #mobileBar button { flex:1; position:relative; padding:10px; }
+    #mobileBar button.on { background:var(--gold); color:#222; }
+    .unread { position:absolute; top:-6px; right:8px; background:var(--red); color:#fff; border-radius:999px; font-size:11px; padding:1px 6px; }
+    #peek { position:fixed; left:10px; right:10px; top:calc(52px + env(safe-area-inset-top)); z-index:14; background:#000d; border-radius:12px;
+            padding:8px 10px; font-size:14px; align-items:center; gap:6px; }
+    #peek.show { display:flex; }
+  }
 </style>
 </head>
 <body>
@@ -96,20 +220,51 @@
 <div id="login" class="center">
   <h1>🃏 Xì Dách</h1>
   <input id="nick" placeholder="Nickname" maxlength="16" autocomplete="off">
-  <input id="room" placeholder="Mã phòng" maxlength="20" value="phong1">
   <div class="note" style="text-align:center">Chọn ava (hoặc 📷 để up ảnh)</div>
   <div id="loginPicker" class="picker"></div>
-  <button id="joinBtn">Vào chơi</button>
+  <button id="joinBtn">Vào sảnh</button>
   <div class="note" id="modeNote"></div>
+</div>
+
+<div id="lobby" hidden>
+  <header>
+    <div style="display:flex;align-items:center">👋&nbsp;<span id="lobbyMe"></span></div>
+    <div class="hbtns">
+      <button class="sec" id="lobbyAva">🐾<span class="lbl"> Đổi ava</span></button>
+      <button class="sec" id="lobbyNick">✏️<span class="lbl"> Đổi nick</span></button>
+    </div>
+  </header>
+  <div class="lobby-wrap">
+    <div class="lobby-top"><h2>🃏 Sảnh chờ</h2><button id="newTableBtn">＋ Tạo bàn</button></div>
+    <div id="tables" class="tables"></div>
+  </div>
+</div>
+
+<div id="newTableModal" class="modal" hidden>
+  <div class="center">
+    <h3>Tạo bàn mới</h3>
+    <input id="tName" placeholder="Tên bàn (vd: Bàn VIP)" maxlength="20" autocomplete="off">
+    <input id="tPass" placeholder="Mật khẩu (bỏ trống = bàn mở)" maxlength="20" autocomplete="off">
+    <button id="tCreate">Tạo và vào bàn</button>
+    <button class="sec" data-close>Hủy</button>
+  </div>
+</div>
+<div id="passModal" class="modal" hidden>
+  <div class="center">
+    <h3>🔒 <span id="passTitle"></span></h3>
+    <input id="passInput" type="password" placeholder="Nhập mật khẩu bàn" autocomplete="off">
+    <button id="passOk">Vào bàn</button>
+    <button class="sec" data-close>Hủy</button>
+  </div>
 </div>
 
 <div id="game" hidden>
   <header>
     <div>Phòng <b id="roomName"></b> · Bạn là <b id="meName"></b></div>
-    <div style="display:flex;gap:8px">
-      <button class="sec" id="avaBtn">🐾 Đổi ava</button>
-      <button class="sec" id="copyBtn">📋 Copy link mời</button>
-      <button class="sec" id="leaveBtn">Thoát</button>
+    <div class="hbtns">
+      <button class="sec" id="avaBtn">🐾<span class="lbl"> Đổi ava</span></button>
+      <button class="sec" id="copyBtn">📋<span class="lbl"> Copy link mời</span></button>
+      <button class="sec" id="leaveBtn">⬅<span class="lbl"> Về sảnh</span></button>
     </div>
   </header>
   <div class="grid">
@@ -118,6 +273,7 @@
         <div class="felt">
           <div class="center-box">
             <div id="status"></div>
+            <div id="turn"></div>
             <div id="actions">
               <div id="betBox"><span>Cược</span><input id="betInput" type="number" min="1" step="1"><button id="readyBtn"></button></div>
               <span id="btns" style="display:contents"></span>
@@ -126,16 +282,23 @@
           </div>
         </div>
         <div id="seats"></div>
+        <div id="floats"></div>
       </div>
     </section>
-    <aside>
+    <aside id="side" data-show="chat">
       <div class="panel ledger"><h3>📒 Sổ điểm</h3><div id="ledger"></div></div>
-      <div class="panel"><h3>💬 Chat</h3>
+      <div class="panel chatpanel"><h3>💬 Chat</h3>
         <div id="chatLog"></div>
         <form id="chatForm"><input id="chatInput" maxlength="200" placeholder="Nhắn gì đó..." autocomplete="off"><button>Gửi</button></form>
       </div>
     </aside>
   </div>
+</div>
+<div id="peek"></div>
+<div id="mobileActions"></div>
+<div id="mobileBar">
+  <button class="sec" id="tabChat">💬 Chat<span class="unread" id="unread" hidden></span></button>
+  <button class="sec" id="tabLedger">📒 Sổ điểm</button>
 </div>
 <div id="avaModal" hidden>
   <div class="center">
@@ -329,7 +492,13 @@ function fileToAva(file) {
 }
 async function setAva(a) {
   myAva = a; localStorage.xd_ava = a; renderPickers();
-  if (me) { presenceVal.ava = a; await api.update(`rooms/${room}/players/${me}`, { ava: a }); }
+  if (lobbyVal) lobbyVal.ava = a;
+  if (me && room) {
+    presenceVal.ava = a;
+    await api.update(`rooms/${room}/players/${me}`, { ava: a });
+    await api.update(`lobby/${room}/online/${me}`, { ava: a });
+  }
+  if (!$("#lobby").hidden) $("#lobbyMe").innerHTML = avaHtml(myAva) + esc(myName);
 }
 
 function norm(g) {
@@ -456,6 +625,14 @@ function cardHtml(c, hidden) {
   return `<div class="c ${red ? "red" : ""}"><span>${esc(rankOf(c))}</span><span>${s}</span></div>`;
 }
 
+function handLabelHtml(c) {
+  const special = { xiban: ["XÌ BÀN", "🔥"], xidach: ["XÌ DÁCH", "⭐"], ngulinh: ["NGŨ LINH", "✨"] }[c.type];
+  if (special) return `<div class="hl ${c.type}"><span class="g">${special[0]}</span> ${special[1]}</div>`;
+  if (c.type === "quac") return `<div class="hl quac"><span class="g">QUẮC</span> <small>${c.pts}</small></div>`;
+  if (c.type === "non") return `<div class="hl non"><span class="g">NON</span> <small>${c.pts}</small></div>`;
+  return `<div class="hl normal">${c.pts} <small>điểm</small></div>`;
+}
+
 function seatHtml(p, g, pos) {
   const isD = p === g.dealer, h = g.hands[p], res = g.results[p];
   const active = g.phase === "playing" && h && (isD ? allDone(g) : !h.done);
@@ -464,7 +641,7 @@ function seatHtml(p, g, pos) {
   if (g.phase === "betting" || (g.phase === "result" && !h)) {
     info = isD ? "Nhà cái" : g.bets[p] ? `✅ Sẵn sàng · cược ${g.bets[p]}` : "Chưa sẵn sàng";
   } else if (h) {
-    if (g.phase === "result" && res) info = esc(res.label);
+    if (g.phase === "result" && res) info = isD ? "Nhà cái" : `cược ${h.bet}`;
     else {
       const mine = p === me ? ` · ${esc(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN).label)}` : "";
       info = (isD ? (allDone(g) ? "🎴 Đang rút" : "Chờ người chơi") : h.done ? "✋ Đã dằn" : "🎴 Đang rút") + (isD ? "" : ` · cược ${h.bet}`) + mine;
@@ -472,9 +649,10 @@ function seatHtml(p, g, pos) {
   } else info = "Đang xem";
   const delta = g.phase === "result" && res
     ? `<span class="delta ${res.delta > 0 ? "plus" : res.delta < 0 ? "minus" : ""}">${res.delta ? fmt(res.delta) : "hòa"}</span>` : "";
-  return `<div class="seat ${isD ? "dealer" : ""} ${p === me ? "me" : ""} ${active ? "active" : ""}" style="${pos}">
+  return `<div class="seat ${isD ? "dealer" : ""} ${p === me ? "me" : ""} ${active ? "active" : ""}" data-p="${esc(p)}" style="${pos}">
     ${delta}
     <div class="name">${avaHtml(PLAYERS[p]?.ava)}<span class="nm"><span class="dot ${online(p) ? "on" : ""}"></span>${esc(nameOf(p, g))}</span>${isD ? '<span class="badge cai">CÁI</span>' : ""}${p === me ? '<span class="badge">bạn</span>' : ""}</div>
+    ${h && g.phase === "result" ? handLabelHtml(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN)) : ""}
     ${h ? `<div class="cards">${h.cards.map(c => cardHtml(c, !showFace)).join("")}</div>` : ""}
     <div class="label">${info}</div>
   </div>`;
@@ -482,10 +660,24 @@ function seatHtml(p, g, pos) {
 
 // Place seats around the oval: me at the bottom, dealer at the top if I'm only watching
 function seatPositions(list) {
-  const mobile = innerWidth < 600, rx = mobile ? 31 : 41, ry = mobile ? 43 : 40;
+  const mobile = isMobile(), rx = mobile ? 33 : 41, ry = 40;
   const out = [], put = (p, deg) => { const a = deg * Math.PI / 180;
     out.push([p, `left:${(50 + rx * Math.cos(a)).toFixed(2)}%;top:${(50 + ry * Math.sin(a)).toFixed(2)}%`]); };
   const dealer = G.dealer, hasMe = list.includes(me), hasD = list.includes(dealer);
+  if (mobile) {
+    // Phone: one seat on top, me at the bottom, everyone else in a left and a right column
+    const pos = (p, x, y) => out.push([p, `left:${x}%;top:${y}%`]);
+    const bottom = hasMe ? me : null;
+    const top = hasD && dealer !== me ? dealer : list.find(p => p !== me);
+    const rest = list.filter(p => p !== bottom && p !== top);
+    if (top) pos(top, 50, 11);
+    if (bottom) pos(bottom, 50, 86);
+    const L = rest.filter((_, i) => i % 2 === 0), R = rest.filter((_, i) => i % 2 === 1);
+    const rows = n => n === 1 ? [45] : n === 2 ? [32, 61] : Array.from({ length: n }, (_, i) => 28 + i * 34 / (n - 1));
+    L.forEach((p, i) => pos(p, 19, rows(L.length)[i].toFixed(1)));
+    R.forEach((p, i) => pos(p, 81, rows(R.length)[i].toFixed(1)));
+    return out;
+  }
   if (hasMe && hasD && me !== dealer) {
     // me at bottom (90°), dealer at top (270°), others split on left and right arcs
     const others = list.filter(p => p !== me && p !== dealer), half = Math.ceil(others.length / 2);
@@ -503,6 +695,47 @@ function seatPositions(list) {
 }
 addEventListener("resize", () => render());
 
+const isMobile = () => matchMedia("(max-width: 700px)").matches;
+// On phones the buttons live in a thumb-friendly strip above the bottom bar
+function placeActions() {
+  const target = isMobile() ? $("#mobileActions") : $(".center-box");
+  if ($("#actions").parentElement !== target) target.appendChild($("#actions"));
+}
+const chip = p => `<span class="chip">${avaHtml(PLAYERS[p]?.ava, "sm")}${esc(nameOf(p))}</span>`;
+
+// "Whose turn" box in the middle of the table
+function turnHtml(g) {
+  if (g.phase !== "playing") return "";
+  if (allDone(g)) {
+    return g.dealer === me ? `<div class="myturn">🔔 Tới lượt bạn (cái)!</div>`
+                           : `<div class="lead">👑 Lượt nhà cái</div>${chip(g.dealer)}`;
+  }
+  const waiting = roundPlayers(g).filter(p => !g.hands[p].done);
+  const mine = waiting.includes(me) ? `<div class="myturn">🔔 Tới lượt bạn!</div>` : "";
+  const others = waiting.filter(p => p !== me);
+  return mine + (others.length ? `<div class="lead">${mine ? "Cùng rút với" : "Đang rút bài"}:</div>${others.map(chip).join("")}` : "");
+}
+
+// +/- points floating up from each seat when a round ends
+let floatRound = null;
+function spawnFloats(g) {
+  if (g.phase !== "result") return;
+  if (floatRound === null) { floatRound = g.round; return; }   // just joined → don't replay an old round
+  if (floatRound === g.round) return;
+  floatRound = g.round;
+  const box = $("#floats");
+  for (const [p, r] of Object.entries(g.results)) {
+    const seat = document.querySelector(`.seat[data-p="${CSS.escape(p)}"]`);
+    if (!seat) continue;
+    const el = document.createElement("div");
+    el.className = `float ${r.delta > 0 ? "plus" : r.delta < 0 ? "minus" : "zero"} ${p === me ? "big" : ""}`;
+    el.textContent = r.delta ? (r.delta > 0 ? "💰 " : "💸 ") + fmt(r.delta) : "🤝 Hòa";
+    el.style.left = seat.style.left; el.style.top = seat.style.top;
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+}
+
 function render() {
   if (!G || !me) return;
   const g = G;
@@ -517,7 +750,7 @@ function render() {
   $("#betBox").style.display = "none";
 
   if (g.phase === "playing") {
-    status = `Ván #${g.round} · ${allDone(g) ? `Tới lượt cái (${esc(nameOf(g.dealer))})` : "Người chơi đang rút bài"}`;
+    status = `Ván #${g.round}`;
     if (isD) {
       if (allDone(g)) {
         const pts = score(h.cards);
@@ -551,6 +784,9 @@ function render() {
     if (g.phase === "result") btns += `<button class="sec" data-a="next">Dọn bàn</button>`;
   }
   $("#status").innerHTML = status;
+  $("#turn").innerHTML = turnHtml(g);
+  placeActions();
+  spawnFloats(g);
   $("#btns").innerHTML = btns;
   $("#hint").textContent = hint;
 
@@ -565,7 +801,17 @@ function render() {
     <div style="margin-top:10px"><button data-a="closeBook" ${g.phase === "playing" || !pays.length ? "disabled" : ""}>📒 Chốt sổ</button></div>`;
 }
 
+let seenChat = null;
 function renderChat(v) {
+  const keys = Object.keys(v || {}).sort();
+  const sheetOpen = !isMobile() || ($("#side").classList.contains("open") && $("#side").dataset.show === "chat");
+  if (seenChat === null || sheetOpen) { seenChat = keys.at(-1) || ""; $("#unread").hidden = true; }
+  else {
+    const fresh = keys.filter(k => k > seenChat && (v[k].name || v[k].type === "close") && v[k].pid !== me);
+    $("#unread").hidden = !fresh.length; $("#unread").textContent = fresh.length;
+    const k = fresh.at(-1);
+    if (k && !(CHAT && CHAT[k])) peek(v[k]);
+  }
   CHAT = v;
   const box = $("#chatLog");
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
@@ -578,41 +824,168 @@ function renderChat(v) {
   if (atBottom) box.scrollTop = box.scrollHeight;
 }
 
+function peek(m) {
+  const el = $("#peek");
+  el.innerHTML = m.type === "close" ? esc(m.text)
+    : m.name ? `${avaHtml(PLAYERS[m.pid]?.ava, "sm")}<b>${esc(m.name)}:</b> ${esc(m.text)}` : `<i>${esc(m.text)}</i>`;
+  el.classList.add("show");
+  clearTimeout(peek.t); peek.t = setTimeout(() => el.classList.remove("show"), 3500);
+}
+function openSheet(which) {
+  const side = $("#side");
+  const wasOpen = side.classList.contains("open") && side.dataset.show === which;
+  side.classList.toggle("open", !wasOpen);
+  side.dataset.show = which;
+  $("#tabChat").classList.toggle("on", !wasOpen && which === "chat");
+  $("#tabLedger").classList.toggle("on", !wasOpen && which === "ledger");
+  if (!wasOpen && which === "chat") {
+    $("#unread").hidden = true; $("#peek").classList.remove("show");
+    seenChat = Object.keys(CHAT || {}).sort().at(-1) || "";
+    const box = $("#chatLog"); box.scrollTop = box.scrollHeight;
+  }
+}
+
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 2200); }
 const say = text => api.push(`rooms/${room}/chat`, { name: "", text, ts: Date.now() });
 
 // =====================================================================
 // 7) JOIN + EVENTS
 // =====================================================================
-async function join() {
-  const name = $("#nick").value.trim();
-  if (!name) return toast("Nhập nickname đã bệ hạ ơi");
-  room = keyify($("#room").value || "phong1") || "phong1";
-  me = "u_" + keyify(name); myName = name; gamePath = `rooms/${room}/game`;
-  localStorage.xd_nick = name;
-  const existing = await api.get(`rooms/${room}/players/${me}`);
-  if (existing?.online && existing.sid !== sid && !confirm(`"${name}" đang online ở chỗ khác. Vẫn vào bằng tên này?`)) return;
+// =====================================================================
+// LOBBY: lobby/<roomId> = { meta: {name, passHash, owner, ownerName, createdAt}, online: {pid: {name, ava}} }
+// =====================================================================
+let LOBBY = {}, lobbyVal = null, pendingRoom = null;
 
-  history.replaceState(null, "", `?r=${encodeURIComponent(room)}`);
-  $("#login").hidden = true; $("#game").hidden = false;
-  $("#roomName").textContent = room; $("#meName").textContent = name;
+// Small non-reversible hash so the password isn't stored as plain text (friend-level protection only)
+function hashPass(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (const ch of "xd:" + str) { const c = ch.codePointAt(0); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+const passOk = (id, meta) => !meta?.passHash || sessionStorage["xd_ok_" + id] === meta.passHash;
 
-  api.on(gamePath, v => { G = v ? norm(v) : null; render(); });
-  api.on(`rooms/${room}/players`, v => { PLAYERS = v || {}; render(); if (CHAT) renderChat(CHAT); });
-  api.on(`rooms/${room}/chat`, renderChat, 80);
-  presenceVal = { name, online: true, sid, ava: myAva };
-  api.presence(`rooms/${room}/players/${me}`, presenceVal, { online: false });
-  await A.ensure();
-  say(`${name} vào phòng`);
+function setIdentity(name) {
+  myName = name; me = "u_" + keyify(name);
+  localStorage.xd_nick = name; sessionStorage.xd_in = "1";
 }
 
+function enterLobby() {
+  $("#login").hidden = true; $("#game").hidden = true; $("#lobby").hidden = false;
+  $("#lobbyMe").innerHTML = avaHtml(myAva) + esc(myName);
+  history.replaceState(null, "", location.pathname);
+  api.on("lobby", v => { LOBBY = v || {}; renderLobby(); });
+}
+
+function renderLobby() {
+  const list = Object.entries(LOBBY).filter(([, t]) => t && t.meta).map(([id, t]) => ({ id, ...t.meta, online: Object.values(t.online || {}) }))
+    .sort((a, b) => b.online.length - a.online.length || (b.createdAt || 0) - (a.createdAt || 0));
+  $("#tables").innerHTML = list.length ? list.map(t => `
+    <div class="tcard ${t.online.length ? "" : "empty"}" data-room="${esc(t.id)}">
+      <div class="count ${t.online.length ? "live" : ""}">${t.online.length ? "🟢 " + t.online.length + " người" : "Trống"}</div>
+      <div class="tname">${t.passHash ? "🔒" : "🃏"}<span>${esc(t.name)}</span></div>
+      <div class="avas">${t.online.slice(0, 10).map(o => avaHtml(o.ava)).join("")}${t.online.length > 10 ? `<span class="label">+${t.online.length - 10}</span>` : ""}</div>
+      <div class="meta"><span>Chủ bàn: ${esc(t.ownerName || "?")}</span>
+        <span>${!t.online.length && t.owner === me ? `<button class="del" data-del="${esc(t.id)}" title="Xóa bàn">🗑</button> ` : ""}<button class="go">Vào bàn</button></span></div>
+    </div>`).join("")
+    : `<div class="noTables">Chưa có bàn nào.<br>Bấm <b>＋ Tạo bàn</b> để mở bàn đầu tiên nhé!</div>`;
+}
+
+const goRoom = id => { location.href = `${location.pathname}?r=${encodeURIComponent(id)}`; };
+
+function tryRoom(id) {
+  const meta = LOBBY[id]?.meta;
+  if (passOk(id, meta)) return goRoom(id);
+  pendingRoom = id;
+  $("#passTitle").textContent = meta.name; $("#passInput").value = "";
+  $("#passModal").hidden = false; setTimeout(() => $("#passInput").focus(), 50);
+}
+
+async function createTable() {
+  const name = $("#tName").value.trim(), pass = $("#tPass").value;
+  const id = keyify(name);
+  if (!id) return toast("Đặt tên bàn đã nhé");
+  if (await api.get(`lobby/${id}/meta`)) return toast("Tên bàn này có rồi, chọn tên khác nha");
+  const passHash = pass ? hashPass(pass) : "";
+  await api.set(`lobby/${id}/meta`, { name, passHash, owner: me, ownerName: myName, createdAt: Date.now() });
+  if (passHash) sessionStorage["xd_ok_" + id] = passHash;
+  goRoom(id);
+}
+
+// =====================================================================
+// ENTER A TABLE
+// =====================================================================
+async function join(roomId) {
+  room = roomId; gamePath = `rooms/${room}/game`;
+  let meta = await api.get(`lobby/${room}/meta`);
+  if (!meta) {                                   // old invite link → register the table in the lobby
+    meta = { name: room, passHash: "", owner: me, ownerName: myName, createdAt: Date.now() };
+    await api.set(`lobby/${room}/meta`, meta);
+  }
+  if (!passOk(room, meta)) { enterLobby(); LOBBY[room] = { meta }; return tryRoom(room); }
+
+  const existing = await api.get(`rooms/${room}/players/${me}`);
+  if (existing?.online && existing.sid !== sid && !confirm(`"${myName}" đang online ở chỗ khác. Vẫn vào bằng tên này?`)) { room = ""; return enterLobby(); }
+
+  $("#login").hidden = true; $("#lobby").hidden = true; $("#game").hidden = false;
+  document.body.classList.add("in-game");
+  $("#roomName").textContent = (meta.passHash ? "🔒 " : "") + meta.name; $("#meName").textContent = myName;
+
+  api.on(gamePath, v => { G = v ? norm(v) : null; if (G && floatRound === null && G.phase !== "result") floatRound = G.round; render(); });
+  api.on(`rooms/${room}/players`, v => { PLAYERS = v || {}; render(); if (CHAT) renderChat(CHAT); });
+  api.on(`rooms/${room}/chat`, renderChat, 80);
+  presenceVal = { name: myName, online: true, sid, ava: myAva };
+  api.presence(`rooms/${room}/players/${me}`, presenceVal, { online: false });
+  lobbyVal = { name: myName, ava: myAva };
+  api.presence(`lobby/${room}/online`, { [me]: lobbyVal }, { [me]: null });
+  await A.ensure();
+  say(`${myName} vào bàn`);
+}
+
+// =====================================================================
+// BOOT
+// =====================================================================
 $("#modeNote").innerHTML = USE_FIREBASE
-  ? "🌐 Online qua Firebase. Gửi link phòng cho bạn bè là vào chơi chung được."
+  ? "🌐 Online qua Firebase."
   : "🧪 <b>Chế độ thử</b> (chưa có Firebase): mở nhiều tab trên cùng máy, mỗi tab một nickname để test.";
 $("#nick").value = localStorage.xd_nick || "";
-const qr = new URLSearchParams(location.search).get("r"); if (qr) $("#room").value = qr;
-$("#joinBtn").onclick = join;
-$("#nick").addEventListener("keydown", e => e.key === "Enter" && join());
+const qr = new URLSearchParams(location.search).get("r");
+function start() {
+  const name = $("#nick").value.trim();
+  if (!name) return toast("Nhập nickname đã bệ hạ ơi");
+  setIdentity(name);
+  qr ? join(keyify(qr)) : enterLobby();
+}
+$("#joinBtn").onclick = start;
+$("#nick").addEventListener("keydown", e => e.key === "Enter" && start());
+if (sessionStorage.xd_in && localStorage.xd_nick) start();     // already logged in this tab → skip the login screen
+
+// Lobby events
+$("#tables").addEventListener("click", async e => {
+  const del = e.target.closest("[data-del]");
+  if (del) {
+    e.stopPropagation();
+    if (!confirm("Xóa bàn này luôn (cả sổ điểm và chat)?")) return;
+    await api.set(`rooms/${del.dataset.del}`, null); await api.set(`lobby/${del.dataset.del}`, null);
+    return toast("Đã xóa bàn");
+  }
+  const card = e.target.closest("[data-room]");
+  if (card) tryRoom(card.dataset.room);
+});
+$("#newTableBtn").onclick = () => { $("#tName").value = ""; $("#tPass").value = ""; $("#newTableModal").hidden = false; setTimeout(() => $("#tName").focus(), 50); };
+$("#tCreate").onclick = createTable;
+$("#passOk").onclick = () => {
+  const meta = LOBBY[pendingRoom]?.meta;
+  if (!meta) return;
+  if (hashPass($("#passInput").value) !== meta.passHash) return toast("Sai mật khẩu rồi 🙅");
+  sessionStorage["xd_ok_" + pendingRoom] = meta.passHash;
+  goRoom(pendingRoom);
+};
+$("#passInput").addEventListener("keydown", e => e.key === "Enter" && $("#passOk").click());
+document.querySelectorAll(".modal [data-close]").forEach(b => b.onclick = () => b.closest(".modal").hidden = true);
+$("#lobbyAva").onclick = () => { renderPickers(); $("#avaModal").hidden = false; };
+$("#lobbyNick").onclick = () => { delete sessionStorage.xd_in; location.href = location.pathname; };
 
 document.addEventListener("click", e => {
   const a = e.target.closest("[data-a]")?.dataset.a;
@@ -643,6 +1016,12 @@ $("#avaBtn").onclick = () => { renderPickers(); $("#avaModal").hidden = false; }
 $("#avaClose").onclick = () => $("#avaModal").hidden = true;
 $("#avaModal").onclick = e => { if (e.target.id === "avaModal") $("#avaModal").hidden = true; };
 renderPickers();
+$("#tabChat").onclick = () => openSheet("chat");
+// keep the table sized to whatever height the phone action strip currently has
+new ResizeObserver(([e]) => document.documentElement.style.setProperty("--act-h", Math.ceil(e.target.offsetHeight) + "px"))
+  .observe($("#mobileActions"));
+$("#tabLedger").onclick = () => openSheet("ledger");
+$("#peek").onclick = () => openSheet("chat");
 $("#readyBtn").onclick = () => {
   if (G?.bets?.[me]) return A.ready(0);
   const bet = Math.floor(+$("#betInput").value);
@@ -656,7 +1035,11 @@ $("#chatForm").onsubmit = e => {
   $("#chatInput").value = "";
 };
 $("#copyBtn").onclick = () => navigator.clipboard.writeText(location.href).then(() => toast("Đã copy link, gửi cho bạn bè nhé!"));
-$("#leaveBtn").onclick = () => { api.update(`rooms/${room}/players/${me}`, { online: false }); location.href = location.pathname; };
+$("#leaveBtn").onclick = async () => {
+  await api.update(`rooms/${room}/players/${me}`, { online: false });
+  await api.update(`lobby/${room}/online`, { [me]: null });
+  location.href = location.pathname;
+};
 </script>
 </body>
 </html>
