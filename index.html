@@ -329,6 +329,7 @@
   <header>
     <div>Phòng <b id="roomName"></b> · Bạn là <b id="meName"></b></div>
     <div class="hbtns">
+      <button class="sec" id="muteBtn">🔊</button>
       <button class="sec" id="setBtn" hidden>⚙️<span class="lbl"> Quản lý</span></button>
       <button class="sec" id="avaBtn">🐾<span class="lbl"> Đổi ava</span></button>
       <button class="sec" id="copyBtn">📋<span class="lbl"> Copy link mời</span></button>
@@ -489,6 +490,88 @@ function makeLocalApi() {
   };
   return self;
 }
+
+// =====================================================================
+// SOUND — synthesized "real-ish" sounds (paper noise for cards, metal partials for coins).
+// To use real recordings instead, put mp3 paths here (e.g. deal: "sounds/deal.mp3") and upload them next to index.html.
+// =====================================================================
+const SOUND_FILES = { deal: "", flip: "", win: "", lose: "", bigwin: "", turn: "", chat: "" };
+let audioCtx = null, noiseBuf = null, muted = localStorage.xd_mute === "1";
+function getCtx() {
+  if (!audioCtx) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    audioCtx = new C();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function noiseOf(ctx) {
+  if (noiseBuf && noiseBuf.sampleRate === ctx.sampleRate) return noiseBuf;
+  const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return (noiseBuf = b);
+}
+// filtered noise burst: paper / card sounds
+function nz(ctx, out, t, dur, { type = "bandpass", f = 2000, f2 = f, Q = 1, g = .4, atk = .004 } = {}) {
+  const src = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), gn = ctx.createGain();
+  src.buffer = noiseOf(ctx);
+  flt.type = type; flt.Q.value = Q;
+  flt.frequency.setValueAtTime(f, t); flt.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + atk); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(flt).connect(gn).connect(out);
+  src.start(t, Math.random() * .5); src.stop(t + dur + .02);
+}
+// decaying tone: bells, coins, music
+function tn(ctx, out, t, freq, dur, { type = "sine", g = .2, f2 = freq, atk = .005 } = {}) {
+  const o = ctx.createOscillator(), gn = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (f2 !== freq) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + atk); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(gn).connect(out); o.start(t); o.stop(t + dur + .02);
+}
+// metallic "clink" = inharmonic partials, like coins / chips hitting
+function clink(ctx, out, t, f, g = .12) {
+  [[1, 1], [2.76, .55], [5.4, .3], [8.93, .15]].forEach(([r, a]) => tn(ctx, out, t, f * r, .25 / Math.sqrt(r), { g: g * a, atk: .002 }));
+  nz(ctx, out, t, .015, { type: "highpass", f: 5000, g: g * .8, atk: .001 });
+}
+const SYNTH = {
+  deal(ctx, o, t) {                                   // card sliding across felt + soft landing tap
+    nz(ctx, o, t, .13, { f: 3800, f2: 1100, Q: .7, g: .32, atk: .01 });
+    nz(ctx, o, t + .11, .035, { type: "lowpass", f: 900, g: .35, atk: .002 });
+  },
+  flip(ctx, o, t) {                                   // card snapped over
+    nz(ctx, o, t, .05, { type: "highpass", f: 1800, f2: 3500, g: .45, atk: .002 });
+    nz(ctx, o, t + .01, .06, { type: "lowpass", f: 600, g: .3, atk: .002 });
+  },
+  win(ctx, o, t) {                                    // a few chips/coins dropping on the pile
+    [0, .07, .15, .21, .3].forEach((d, i) => clink(ctx, o, t + d, 2300 + Math.random() * 900, .13 - i * .015));
+  },
+  lose(ctx, o, t) {                                   // soft descending "aww" + chips slid away
+    [392, 330, 262].forEach((f, i) => tn(ctx, o, t + i * .13, f, .28, { type: "triangle", g: .12 }));
+    nz(ctx, o, t + .05, .35, { f: 1600, f2: 500, Q: .6, g: .12, atk: .05 });
+  },
+  bigwin(ctx, o, t) {                                 // little fanfare + a shower of coins
+    [523, 659, 784, 1047].forEach((f, i) => { tn(ctx, o, t + i * .09, f, .35, { type: "triangle", g: .14 }); tn(ctx, o, t + i * .09, f * 2, .25, { g: .04 }); });
+    tn(ctx, o, t + .36, 1047, .7, { type: "triangle", g: .14 }); tn(ctx, o, t + .36, 1319, .7, { g: .08 });
+    for (let i = 0; i < 9; i++) clink(ctx, o, t + .3 + i * .055 + Math.random() * .03, 2200 + Math.random() * 1400, .09);
+  },
+  turn(ctx, o, t) {                                   // small desk bell
+    tn(ctx, o, t, 1318, .9, { g: .16, atk: .002 }); tn(ctx, o, t, 1318 * 2.4, .4, { g: .05, atk: .002 }); tn(ctx, o, t, 659, .6, { g: .06 });
+  },
+  chat(ctx, o, t) {                                   // soft bubble pop
+    tn(ctx, o, t, 520, .09, { f2: 980, g: .13, atk: .003 });
+  },
+};
+const VOL = { deal: 2, flip: 1.2, win: 1.8, lose: 3, bigwin: 1.6, turn: 1.6, chat: 3 };   // balance loudness per sound
+function sfx(name) {
+  if (muted) return;
+  if (SOUND_FILES[name]) { const a = new Audio(SOUND_FILES[name]); a.volume = .8; a.play().catch(() => {}); return; }
+  const ctx = getCtx(); if (!ctx || !SYNTH[name]) return;
+  const master = ctx.createGain(); master.gain.value = .9 * (VOL[name] || 1); master.connect(ctx.destination);
+  try { SYNTH[name](ctx, master, ctx.currentTime + .01); } catch { /* never let sound break the game */ }
+}
+// Phones only allow audio after a tap: unlock on the first touch/click
+addEventListener("pointerdown", () => getCtx(), { once: true });
 
 // =====================================================================
 // 4) CARD LOGIC (Vietnamese xì dách rules)
@@ -763,7 +846,10 @@ function trackDeal(g) {
   if (g.phase === "betting" || dealInfo.round === g.round) return;
   const fresh = gameRendered && g.dealtAt && Math.abs(Date.now() - g.dealtAt) < 6000;   // just dealt, not joining mid-round
   dealInfo = { round: g.round, start: fresh ? Date.now() : 0, n: (g.dealOrder || []).length };
-  if (fresh) { clearTimeout(dealTimer); dealTimer = setTimeout(render, dealEnd() - Date.now() + 30); }
+  if (fresh) {
+    clearTimeout(dealTimer); dealTimer = setTimeout(render, dealEnd() - Date.now() + 30);
+    for (let i = 0; i < dealInfo.n * 2; i++) setTimeout(() => sfx("deal"), i * DEAL_MS);
+  }
 }
 // Returns the extra class/style for a card that should still be flying in (or "" when it has landed)
 function cardAnim(g, p, i, pos) {
@@ -773,7 +859,7 @@ function cardAnim(g, p, i, pos) {
     const j = (g.dealOrder || []).indexOf(p);
     if (dealInfo.start && j >= 0) startAt = dealInfo.start + (i * dealInfo.n + j) * DEAL_MS;
   } else {
-    if (!cardSeen.has(key)) cardSeen.set(key, gameRendered ? now : 0);
+    if (!cardSeen.has(key)) { cardSeen.set(key, gameRendered ? now : 0); if (gameRendered) sfx("deal"); }
     startAt = cardSeen.get(key);
   }
   if (!startAt || now > startAt + FLY_MS) return `"`;
@@ -888,15 +974,18 @@ function turnHtml(g) {
 
 // +/- points floating up from each seat when a round ends
 const floated = new Set();
+let lastTurnKey = null;
 function spawnFloats(g) {
   const due = Object.entries(g.results || {}).filter(([p]) => g.phase === "result" || p !== g.dealer);
   if (!gameRendered) { due.forEach(([p]) => floated.add(g.round + ":" + p)); return; }   // joined mid-round → no replay
   if (dealing()) return;                                     // wait until the cards have landed
   const box = $("#floats");
+  let any = false, mine = null;
   for (const [p, r] of due) {
     const k = g.round + ":" + p;
     if (floated.has(k)) continue;
-    floated.add(k);
+    floated.add(k); any = true;
+    if (p === me) mine = r;
     const seat = document.querySelector(`.seat[data-p="${CSS.escape(p)}"]`);
     if (!seat) continue;
     const el = document.createElement("div");
@@ -905,6 +994,11 @@ function spawnFloats(g) {
     el.style.left = seat.style.left; el.style.top = seat.style.top;
     box.appendChild(el);
     setTimeout(() => el.remove(), 2800);
+  }
+  if (any) sfx("flip");
+  if (mine) {
+    const h = g.hands[me], special = h && classify(h.cards, me === g.dealer ? RULES.DEALER_MIN : RULES.PLAYER_MIN).rank >= 2;
+    setTimeout(() => sfx(mine.delta > 0 ? (special ? "bigwin" : "win") : mine.delta < 0 ? "lose" : "flip"), 180);
   }
 }
 
@@ -966,6 +1060,10 @@ function render() {
   }
   placeActions();
   spawnFloats(g);
+  const myTurn = g.phase === "playing" && !dealing() && !!h && (isD ? allDone(g) : !h.done);
+  const turnKey = myTurn ? g.round + ":" + (isD ? "d" : "p") : null;
+  if (turnKey && turnKey !== lastTurnKey && gameRendered) sfx("turn");
+  lastTurnKey = turnKey;
   gameRendered = true;
   $("#btns").innerHTML = btns;
   $("#hint").textContent = hint;
@@ -984,6 +1082,7 @@ function render() {
 let seenChat = null;
 function renderChat(v) {
   const keys = Object.keys(v || {}).sort();
+  if (CHAT && keys.some(k => !CHAT[k] && v[k].name && v[k].pid !== me)) sfx("chat");
   const sheetOpen = !isMobile() || ($("#side").classList.contains("open") && $("#side").dataset.show === "chat");
   if (seenChat === null || sheetOpen) { seenChat = keys.at(-1) || ""; $("#unread").hidden = true; }
   else {
@@ -1329,6 +1428,9 @@ $("#adminLogin").onclick = async () => {
 $("#lobbyAdmin").onclick = () => authApi.logout().then(() => location.reload());
 $("#annClose").onclick = () => { sessionStorage.xd_ann = String(ADMIN.announce?.ts); $("#announce").hidden = true; };
 $("#setBtn").onclick = openSettings;
+const muteIcon = () => { $("#muteBtn").textContent = muted ? "🔇" : "🔊"; };
+$("#muteBtn").onclick = () => { muted = !muted; localStorage.xd_mute = muted ? "1" : "0"; muteIcon(); if (!muted) sfx("chat"); };
+muteIcon();
 
 $("#lobbyAva").onclick = () => { renderPickers(); $("#avaModal").hidden = false; };
 $("#lobbyNick").onclick = () => { delete sessionStorage.xd_in; location.href = location.pathname; };
