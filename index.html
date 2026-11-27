@@ -82,6 +82,17 @@
   @keyframes shine { to { background-position: 200% center; } }
   @keyframes pop { 0% { transform:scale(.3); opacity:0; } 70% { transform:scale(1.2); opacity:1; } 100% { transform:scale(1); } }
 
+  .xet { margin-top:4px; padding:6px 14px; font-size:14px; background:linear-gradient(90deg,#f4c542,#ffdf7e); animation: pulse 1.2s ease-in-out infinite; }
+  .xet:disabled { animation:none; }
+  .seat.waitxet { border-style:dashed; }
+  .c.fly { animation: dealIn .45s cubic-bezier(.2,.8,.3,1) both; }
+  @keyframes dealIn {
+    0% { transform: translate(var(--dx), var(--dy)) rotate(-30deg) scale(.6); opacity:0; }
+    12% { opacity:1; }
+    100% { transform:none; opacity:1; }
+  }
+  .dealing { font-size:15px; color:#fff; font-weight:700; animation: pulse 1s ease-in-out infinite; }
+
   #floats { position:absolute; inset:0; pointer-events:none; z-index:5; }
   .float { position:absolute; transform:translate(-50%,-50%); font-size:34px; font-weight:900; white-space:nowrap;
            text-shadow: 0 0 6px #000, 0 2px 0 #000, 0 0 14px currentColor; animation: floatUp 2.6s ease-out forwards; }
@@ -128,6 +139,40 @@
   #avaModal, .modal { position:fixed; inset:0; background:#000b; display:flex; align-items:center; justify-content:center; z-index:20; }
   #avaModal .center, .modal .center { margin:0 16px; width:min(360px, 92vw); }
   .modal h3 { margin:0; text-align:center; }
+
+  button.danger { background:#7a2328; color:#ffe1e3; }
+  .modal .center.wide { width:min(480px, 94vw); max-height:88dvh; overflow-y:auto; gap:10px; }
+  .sec-t { font-weight:800; color:var(--gold); margin-top:6px; border-bottom:1px solid #2a4537; padding-bottom:4px; }
+  .rgrid { display:grid; grid-template-columns: 1fr auto; gap:8px 10px; align-items:center; }
+  .rgrid select { font:inherit; font-size:16px; padding:6px 10px; border-radius:8px; background:#0d2219; color:var(--ink); border:1px solid #2f5643; }
+  .prow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:6px 0; border-bottom:1px solid #1f3529; font-size:14px; }
+  .prow .sp { flex:1; }
+  .prow button { padding:6px 10px; font-size:13px; }
+  .prow .ptsIn { width:72px; padding:6px; font-size:14px; }
+  .row2 { display:flex; gap:6px; } .row2 input { flex:1; min-width:0; }
+
+  /* ---------- Admin look: badge + golden wings around the name ---------- */
+  .badge.adm { background: linear-gradient(90deg,#7c3aed,#f4c542,#ec4899,#7c3aed); background-size:300% auto; color:#fff;
+               animation: shine 2.4s linear infinite; text-shadow:0 1px 1px #000; letter-spacing:.5px; }
+  .name.adm { position:relative; display:inline-flex !important; align-items:center; padding:0 30px; max-width:100%; }
+  .ptsBox { display:inline-flex; gap:4px; }
+  .wing { position:absolute; top:calc(50% - 15px); width:34px; height:26px; pointer-events:none; }
+  .wing svg { width:100%; height:100%; display:block; filter: drop-shadow(0 0 4px rgba(244,197,66,.9)); }
+  .wing.r { right:-6px; transform-origin: 0% 85%; animation: flapR 1.5s ease-in-out infinite; }
+  .wing.l { left:-6px; transform-origin: 100% 85%; animation: flapL 1.5s ease-in-out infinite; }
+  .wing.l svg { transform: scaleX(-1); }
+  @keyframes flapR { 50% { transform: rotate(-16deg); } }
+  @keyframes flapL { 50% { transform: rotate(16deg); } }
+  .seat.isadmin { border-color:#b388ff; box-shadow: 0 0 0 2px #7c3aed, 0 0 20px rgba(167,139,250,.7); }
+  .seat.isadmin.active { box-shadow: 0 0 0 3px var(--gold), 0 0 22px var(--gold); }
+  .admname { color:#e9d5ff; }
+  .ava.admava { border-color:#f4c542; box-shadow:0 0 8px #f4c542; }
+  #announce { position:fixed; top:0; left:0; right:0; z-index:25; display:flex; align-items:center; gap:8px; padding:10px 14px;
+              padding-top:max(10px, env(safe-area-inset-top)); background:linear-gradient(90deg,#4c1d95,#7c3aed,#b45309); color:#fff;
+              font-size:15px; box-shadow:0 4px 18px rgba(0,0,0,.6); }
+  #announce #annText { flex:1; }
+  #announce button { background:#0005; color:#fff; padding:4px 10px; }
+  #adminLogin { font-size:13px; padding:7px 10px; }
 
   /* ---------- Lobby ---------- */
   .lobby-wrap { max-width:980px; margin:0 auto; padding:16px; padding-bottom:40px; }
@@ -195,7 +240,12 @@
     .seat.me .c + .c { margin-left:-8px; }
     .label { font-size:11px; }
     .float { font-size:28px; } .float.big { font-size:38px; }
+    .xet { padding:5px 10px; font-size:13px; }
     .hl { font-size:19px; } .seat.me .hl { font-size:26px; }
+    .name.adm { padding:0 20px; }
+    .seat.isadmin:not(.me) { width:150px; }
+    .wing { width:24px; height:19px; top:calc(50% - 11px); }
+    .seat .badge.adm { display:none; }
 
     /* chat + ledger become a bottom sheet */
     aside { position:fixed; left:0; right:0; bottom:calc(58px + var(--act-h, 84px) + env(safe-area-inset-bottom)); max-height:52dvh; z-index:15;
@@ -224,12 +274,16 @@
   <div id="loginPicker" class="picker"></div>
   <button id="joinBtn">Vào sảnh</button>
   <div class="note" id="modeNote"></div>
+  <button class="sec" id="adminLogin">👑 Đăng nhập admin</button>
+  <div class="note" id="adminNote" style="text-align:center"></div>
 </div>
+<div id="announce" hidden><span id="annText"></span><button id="annClose">✕</button></div>
 
 <div id="lobby" hidden>
   <header>
     <div style="display:flex;align-items:center">👋&nbsp;<span id="lobbyMe"></span></div>
     <div class="hbtns">
+      <button class="sec" id="lobbyAdmin" hidden>👑<span class="lbl"> Thoát admin</span></button>
       <button class="sec" id="lobbyAva">🐾<span class="lbl"> Đổi ava</span></button>
       <button class="sec" id="lobbyNick">✏️<span class="lbl"> Đổi nick</span></button>
     </div>
@@ -249,6 +303,19 @@
     <button class="sec" data-close>Hủy</button>
   </div>
 </div>
+<div id="setModal" class="modal" hidden>
+  <div class="center wide">
+    <h3>⚙️ Quản lý bàn</h3>
+    <div class="sec-t">Luật bàn</div>
+    <div id="setRules"></div>
+    <div class="sec-t">Ván đang chơi</div>
+    <div id="setRound"></div>
+    <div class="sec-t">Người chơi</div>
+    <div id="setPlayers"></div>
+    <div id="setAdmin"></div>
+    <button class="sec" data-close>Đóng</button>
+  </div>
+</div>
 <div id="passModal" class="modal" hidden>
   <div class="center">
     <h3>🔒 <span id="passTitle"></span></h3>
@@ -262,6 +329,7 @@
   <header>
     <div>Phòng <b id="roomName"></b> · Bạn là <b id="meName"></b></div>
     <div class="hbtns">
+      <button class="sec" id="setBtn" hidden>⚙️<span class="lbl"> Quản lý</span></button>
       <button class="sec" id="avaBtn">🐾<span class="lbl"> Đổi ava</span></button>
       <button class="sec" id="copyBtn">📋<span class="lbl"> Copy link mời</span></button>
       <button class="sec" id="leaveBtn">⬅<span class="lbl"> Về sảnh</span></button>
@@ -323,8 +391,11 @@ const firebaseConfig = {
   appId: "1:795800338178:web:b1c9ac2576260fcbea0c1b"
 };
 
+// Gmail của admin (chỉ người đăng nhập Google bằng email này mới có quyền admin)
+const ADMIN_EMAIL = "";
+
 // =====================================================================
-// 2) GAME RULES — tweak to match your group's house rules
+// 2) DEFAULT GAME RULES — each table's owner can change these in ⚙️
 // =====================================================================
 const RULES = {
   PLAYER_MIN: 16,          // người chơi phải đủ 16 mới được dằn
@@ -333,19 +404,33 @@ const RULES = {
   MULT: { xiban: 2, xidach: 2, ngulinh: 2, normal: 1 },  // hệ số ăn/thua
   DEFAULT_BET: 10,
 };
+const DEFAULT_RULES = structuredClone(RULES);
+function applyRules(r) {                       // load a table's own rules into RULES
+  RULES.PLAYER_MIN = r?.playerMin ?? DEFAULT_RULES.PLAYER_MIN;
+  RULES.DEALER_MIN = r?.dealerMin ?? DEFAULT_RULES.DEALER_MIN;
+  RULES.MULT = { ...DEFAULT_RULES.MULT, ...(r?.mult || {}) };
+}
 
 // =====================================================================
 // 3) BACKEND: Firebase Realtime Database, or localStorage for testing
 // =====================================================================
 const USE_FIREBASE = !!firebaseConfig.databaseURL;
 const clean = v => v === undefined ? null : JSON.parse(JSON.stringify(v));
-let api;
+let api, authApi;
 
 if (USE_FIREBASE) {
   const V = "10.12.2";
   const fb = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
   const d = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-database.js`);
-  const db = d.getDatabase(fb.initializeApp(firebaseConfig));
+  const app = fb.initializeApp(firebaseConfig);
+  const db = d.getDatabase(app);
+  const au = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const auth = au.getAuth(app);
+  authApi = {
+    onChange: cb => au.onAuthStateChanged(auth, cb),
+    login: () => au.signInWithPopup(auth, new au.GoogleAuthProvider()),
+    logout: () => au.signOut(auth),
+  };
   api = {
     on(path, cb, limit) { let r = d.ref(db, path); if (limit) r = d.query(r, d.limitToLast(limit)); return d.onValue(r, s => cb(s.val())); },
     get: async p => (await d.get(d.ref(db, p))).val(),
@@ -362,6 +447,12 @@ if (USE_FIREBASE) {
   };
 } else {
   api = makeLocalApi();
+  // Test mode has no Google login: "admin" is faked per browser so the admin screens can be tried out
+  authApi = {
+    onChange: cb => setTimeout(() => cb(sessionStorage.xd_fakeadmin ? { email: ADMIN_EMAIL || "admin@test" } : null)),
+    login: async () => { if (confirm("Chế độ thử: giả làm admin ở tab này?")) { sessionStorage.xd_fakeadmin = 1; location.reload(); } },
+    logout: async () => { delete sessionStorage.xd_fakeadmin; location.reload(); },
+  };
 }
 
 function makeLocalApi() {
@@ -504,6 +595,7 @@ async function setAva(a) {
 function norm(g) {
   g.bets ||= {}; g.hands ||= {}; g.deck ||= []; g.balances ||= {}; g.names ||= {}; g.results ||= {}; g.history ||= [];
   for (const h of Object.values(g.hands)) h.cards ||= [];
+  applyRules(g.rules);
   return g;
 }
 const online = p => !!PLAYERS[p]?.online;
@@ -520,24 +612,30 @@ function act(fn) {
   });
 }
 
-function finish(g) {
-  const d = g.dealer, dc = classify(g.hands[d].cards, RULES.DEALER_MIN);
-  const res = {}, lines = [];
-  let dsum = 0;
-  for (const p of roundPlayers(g)) {
-    const h = g.hands[p], pc = classify(h.cards, RULES.PLAYER_MIN);
-    const delta = settle(pc, dc) * h.bet;
-    g.balances[p] = (g.balances[p] || 0) + delta;
-    dsum -= delta;
-    res[p] = { label: pc.label, delta };
-    lines.push(`${nameOf(p, g)} ${fmt(delta)}`);
-  }
-  g.balances[d] = (g.balances[d] || 0) + dsum;
-  res[d] = { label: dc.label, delta: dsum };
-  g.results = res;
-  g.phase = "result";
-  g.history = [{ round: g.round, dealer: nameOf(d, g), text: lines.join(", "), dsum }, ...g.history].slice(0, 10);
+// Dealer "xét" one player: compare with the dealer's hand as it is right now, pay out immediately
+function settleOne(g, p) {
+  const d = g.dealer, h = g.hands[p];
+  if (!h || h.revealed || p === d) return;
+  const dc = classify(g.hands[d].cards, RULES.DEALER_MIN), pc = classify(h.cards, RULES.PLAYER_MIN);
+  const delta = settle(pc, dc) * h.bet;
+  g.balances[p] = (g.balances[p] || 0) + delta;
+  g.balances[d] = (g.balances[d] || 0) - delta;
+  g.results[p] = { label: pc.label, delta };
+  g.results[d] = { label: "", delta: (g.results[d]?.delta || 0) - delta };
+  h.revealed = true; h.done = true;
 }
+// End of round: everyone not yet checked is compared with the dealer's final hand
+function finish(g) {
+  const d = g.dealer;
+  for (const p of roundPlayers(g)) settleOne(g, p);
+  const dc = classify(g.hands[d].cards, RULES.DEALER_MIN);
+  g.results[d] = { label: dc.label, delta: g.results[d]?.delta || 0 };
+  g.dealerShown = true;
+  g.phase = "result";
+  const lines = roundPlayers(g).map(p => `${nameOf(p, g)} ${fmt(g.results[p].delta)}`);
+  g.history = [{ round: g.round, dealer: nameOf(d, g), text: lines.join(", "), dsum: g.results[d].delta }, ...g.history].slice(0, 10);
+}
+const unrevealed = g => roundPlayers(g).filter(p => !g.hands[p].revealed);
 
 const A = {
   ensure: () => api.tx(gamePath, cur => {
@@ -562,9 +660,9 @@ const A = {
     const deck = newDeck(), order = [...ps, g.dealer], hands = {};
     for (const p of order) { hands[p] = { cards: [], bet: p === g.dealer ? 0 : g.bets[p], done: false }; g.names[p] = nameOf(p, g); g.balances[p] ??= 0; }
     for (let k = 0; k < 2; k++) for (const p of order) hands[p].cards.push(deck.pop());
-    Object.assign(g, { deck, hands, results: {}, phase: "playing", round: g.round + 1 });
-    for (const p of ps) if (classify(hands[p].cards, RULES.PLAYER_MIN).rank >= 3) hands[p].done = true;
-    if (classify(hands[g.dealer].cards, RULES.DEALER_MIN).rank >= 3) finish(g);   // cái có xì → lật luôn
+    Object.assign(g, { deck, hands, results: {}, phase: "playing", round: g.round + 1, dealerShown: false, dealOrder: order, dealtAt: Date.now() });
+    if (classify(hands[g.dealer].cards, RULES.DEALER_MIN).rank >= 3) finish(g);   // cái có xì → lật hết luôn
+    else for (const p of ps) if (classify(hands[p].cards, RULES.PLAYER_MIN).rank >= 3) settleOne(g, p);   // người có xì → lật ăn ngay
   }),
   hit: () => act(g => {
     const h = g.hands[me], isD = me === g.dealer;
@@ -572,7 +670,16 @@ const A = {
     if (isD && !allDone(g)) return false;
     h.cards.push(g.deck.pop());
     const c = classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN);
-    if (c.type === "quac" || h.cards.length >= RULES.MAX_CARDS) { if (isD) finish(g); else h.done = true; }
+    if (isD) { if (c.type === "quac") finish(g); }                 // cái quắc → tính hết những người chưa xét
+    else if (c.type === "quac" || h.cards.length >= RULES.MAX_CARDS) h.done = true;
+  }),
+  xet: p => act(g => {
+    if (me !== g.dealer || g.phase !== "playing" || !allDone(g) || p === g.dealer) return false;
+    if (!g.hands[p] || g.hands[p].revealed) return false;
+    if (score(g.hands[g.dealer].cards) < RULES.DEALER_MIN) return false;
+    settleOne(g, p);
+    g.dealerShown = true;                                            // cái lật bài của mình khi xét người đầu tiên
+    if (!unrevealed(g).length) finish(g);
   }),
   stand: () => act(g => {
     const h = g.hands[me], isD = me === g.dealer;
@@ -589,6 +696,27 @@ const A = {
     Object.assign(g, { phase: "betting", hands: {}, deck: [], results: {} });
     for (const p of Object.keys(g.bets)) if (!online(p)) delete g.bets[p];
   }),
+  // ---- Owner / admin tools ----
+  saveRules: r => act(g => { if (g.phase === "playing") return false; g.rules = r; }),
+  forceReveal: () => act(g => {
+    if (g.phase !== "playing") return false;
+    for (const p of roundPlayers(g)) g.hands[p].done = true;
+    finish(g);
+  }),
+  cancelRound: () => act(g => {
+    if (g.phase !== "playing") return false;
+    Object.assign(g, { phase: "betting", hands: {}, deck: [], results: {} });
+  }),
+  removeFromGame: p => act(g => {
+    delete g.bets[p];
+    if (g.phase === "playing") {
+      if (p === g.dealer) Object.assign(g, { phase: "betting", hands: {}, deck: [], results: {} });
+      else delete g.hands[p];
+    }
+    if (g.dealer === p) g.dealer = null;
+  }),
+  setPoints: (p, n) => act(g => { if (g.phase === "playing") return false; g.balances[p] = n; }),
+
   // Chốt sổ: snapshot "ai trả ai" into closingText, then zero the ledger
   closeBook: () => act(g => {
     closingText = null;
@@ -619,11 +747,43 @@ function settlements(bal) {
 // =====================================================================
 // 6) RENDERING
 // =====================================================================
-function cardHtml(c, hidden) {
-  if (hidden) return `<div class="c back"></div>`;
+function cardHtml(c, hidden, anim = "") {
+  if (hidden) return `<div class="c back${anim}></div>`;
   const s = c.slice(-1), red = s === "♥" || s === "♦";
-  return `<div class="c ${red ? "red" : ""}"><span>${esc(rankOf(c))}</span><span>${s}</span></div>`;
+  return `<div class="c ${red ? "red" : ""}${anim}><span>${esc(rankOf(c))}</span><span>${s}</span></div>`;
 }
+
+// ---- Dealing animation: cards fly from the middle of the table, one by one ----
+const DEAL_MS = 240, FLY_MS = 450;
+let dealInfo = { round: null, start: 0, n: 0 }, gameRendered = false, dealTimer = null;
+const cardSeen = new Map();
+const dealEnd = () => dealInfo.start + dealInfo.n * 2 * DEAL_MS + FLY_MS;
+const dealing = () => !!G && G.phase !== "betting" && dealInfo.round === G.round && Date.now() < dealEnd();
+function trackDeal(g) {
+  if (g.phase === "betting" || dealInfo.round === g.round) return;
+  const fresh = gameRendered && g.dealtAt && Math.abs(Date.now() - g.dealtAt) < 6000;   // just dealt, not joining mid-round
+  dealInfo = { round: g.round, start: fresh ? Date.now() : 0, n: (g.dealOrder || []).length };
+  if (fresh) { clearTimeout(dealTimer); dealTimer = setTimeout(render, dealEnd() - Date.now() + 30); }
+}
+// Returns the extra class/style for a card that should still be flying in (or "" when it has landed)
+function cardAnim(g, p, i, pos) {
+  const now = Date.now(), key = `${g.round}:${p}:${i}`;
+  let startAt = 0;
+  if (i < 2) {
+    const j = (g.dealOrder || []).indexOf(p);
+    if (dealInfo.start && j >= 0) startAt = dealInfo.start + (i * dealInfo.n + j) * DEAL_MS;
+  } else {
+    if (!cardSeen.has(key)) cardSeen.set(key, gameRendered ? now : 0);
+    startAt = cardSeen.get(key);
+  }
+  if (!startAt || now > startAt + FLY_MS) return `"`;
+  const [x, y] = pos.match(/[\d.]+/g).map(Number), r = $("#ring").getBoundingClientRect();
+  return ` fly" style="--dx:${((50 - x) / 100 * r.width).toFixed(0)}px;--dy:${((50 - y) / 100 * r.height).toFixed(0)}px;animation-delay:${startAt - now}ms"`;
+}
+
+const WING_SVG = `<svg viewBox="0 0 64 40" aria-hidden="true"><defs><linearGradient id="wg" x1="0" x2="1" y1="1" y2="0"><stop offset="0" stop-color="#b8860b"/><stop offset=".45" stop-color="#f4c542"/><stop offset="1" stop-color="#fffbe6"/></linearGradient></defs><path fill="url(#wg)" stroke="#7a5a00" stroke-width="1.2" d="M2 34 C 8 14, 28 3, 62 2 C 52 8, 54 10, 60 12 C 47 16, 49 19, 56 22 C 43 25, 44 28, 50 31 C 36 33, 20 37, 2 34 Z"/><path d="M10 31 C 22 24, 36 16, 54 8 M14 33 C 26 28, 38 23, 50 18 M18 34 C 30 31, 40 29, 46 27" stroke="#a87b00" stroke-width="1" fill="none" opacity=".7"/></svg>`;
+const isAdminPid = p => !!p && p === ADMIN_PID;
+const admBadge = p => isAdminPid(p) ? '<span class="badge adm">ADMIN</span>' : "";
 
 function handLabelHtml(c) {
   const special = { xiban: ["XÌ BÀN", "🔥"], xidach: ["XÌ DÁCH", "⭐"], ngulinh: ["NGŨ LINH", "✨"] }[c.type];
@@ -635,8 +795,13 @@ function handLabelHtml(c) {
 
 function seatHtml(p, g, pos) {
   const isD = p === g.dealer, h = g.hands[p], res = g.results[p];
-  const active = g.phase === "playing" && h && (isD ? allDone(g) : !h.done);
-  const showFace = p === me || g.phase === "result";
+  const isDealing = dealing();
+  const active = !isDealing && g.phase === "playing" && h && (isD ? allDone(g) : !h.done);
+  const showFace = p === me || g.phase === "result" || h?.revealed || (isD && g.dealerShown);
+  const showLbl = h && !isDealing && (g.phase === "result" || (!isD && h.revealed) || (isD && g.dealerShown));
+  const dealerTurn = g.phase === "playing" && allDone(g) && !isDealing;
+  const waitXet = dealerTurn && !isD && h && !h.revealed;
+  const canXet = waitXet && me === g.dealer && score(g.hands[g.dealer].cards) >= RULES.DEALER_MIN;
   let info = "";
   if (g.phase === "betting" || (g.phase === "result" && !h)) {
     info = isD ? "Nhà cái" : g.bets[p] ? `✅ Sẵn sàng · cược ${g.bets[p]}` : "Chưa sẵn sàng";
@@ -644,17 +809,20 @@ function seatHtml(p, g, pos) {
     if (g.phase === "result" && res) info = isD ? "Nhà cái" : `cược ${h.bet}`;
     else {
       const mine = p === me ? ` · ${esc(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN).label)}` : "";
-      info = (isD ? (allDone(g) ? "🎴 Đang rút" : "Chờ người chơi") : h.done ? "✋ Đã dằn" : "🎴 Đang rút") + (isD ? "" : ` · cược ${h.bet}`) + mine;
+      info = isDealing ? "🃏 Đang chia..." : h.revealed && !isD ? `✅ Đã xét · cược ${h.bet}`
+        : (isD ? (allDone(g) ? "🔍 Đang xét bài" : "Chờ người chơi") : waitXet ? "⏳ Chờ cái xét" : h.done ? "✋ Đã dằn" : "🎴 Đang rút") + (isD ? "" : ` · cược ${h.bet}`) + (h.revealed ? "" : mine);
     }
   } else info = "Đang xem";
-  const delta = g.phase === "result" && res
+  const delta = res && !isDealing && (g.phase === "result" || !isD)
     ? `<span class="delta ${res.delta > 0 ? "plus" : res.delta < 0 ? "minus" : ""}">${res.delta ? fmt(res.delta) : "hòa"}</span>` : "";
-  return `<div class="seat ${isD ? "dealer" : ""} ${p === me ? "me" : ""} ${active ? "active" : ""}" data-p="${esc(p)}" style="${pos}">
+  const adm = isAdminPid(p);
+  return `<div class="seat ${isD ? "dealer" : ""} ${p === me ? "me" : ""} ${active ? "active" : ""} ${adm ? "isadmin" : ""} ${waitXet ? "waitxet" : ""}" data-p="${esc(p)}" style="${pos}">
     ${delta}
-    <div class="name">${avaHtml(PLAYERS[p]?.ava)}<span class="nm"><span class="dot ${online(p) ? "on" : ""}"></span>${esc(nameOf(p, g))}</span>${isD ? '<span class="badge cai">CÁI</span>' : ""}${p === me ? '<span class="badge">bạn</span>' : ""}</div>
-    ${h && g.phase === "result" ? handLabelHtml(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN)) : ""}
-    ${h ? `<div class="cards">${h.cards.map(c => cardHtml(c, !showFace)).join("")}</div>` : ""}
+    <div class="name ${adm ? "adm" : ""}">${adm ? `<span class="wing l">${WING_SVG}</span>` : ""}${avaHtml(PLAYERS[p]?.ava, adm ? "admava" : "")}<span class="nm"><span class="dot ${online(p) ? "on" : ""}"></span>${esc(nameOf(p, g))}</span>${admBadge(p)}${adm ? `<span class="wing r">${WING_SVG}</span>` : ""}${isD ? '<span class="badge cai">CÁI</span>' : ""}${p === me ? '<span class="badge">bạn</span>' : ""}</div>
+    ${showLbl ? handLabelHtml(classify(h.cards, isD ? RULES.DEALER_MIN : RULES.PLAYER_MIN)) : ""}
+    ${h ? `<div class="cards">${h.cards.map((c, i) => cardHtml(c, !showFace, cardAnim(g, p, i, pos))).join("")}</div>` : ""}
     <div class="label">${info}</div>
+    ${waitXet && me === g.dealer ? `<button class="xet" data-xet="${esc(p)}" ${canXet ? "" : "disabled"}>🔍 Xét</button>` : ""}
   </div>`;
 }
 
@@ -705,10 +873,12 @@ const chip = p => `<span class="chip">${avaHtml(PLAYERS[p]?.ava, "sm")}${esc(nam
 
 // "Whose turn" box in the middle of the table
 function turnHtml(g) {
+  if (dealing()) return `<div class="dealing">🃏 Đang chia bài...</div>`;
   if (g.phase !== "playing") return "";
   if (allDone(g)) {
-    return g.dealer === me ? `<div class="myturn">🔔 Tới lượt bạn (cái)!</div>`
-                           : `<div class="lead">👑 Lượt nhà cái</div>${chip(g.dealer)}`;
+    const left = unrevealed(g);
+    if (g.dealer === me) return `<div class="myturn">🔔 Lượt bạn: xét bài!</div><div class="lead">Còn ${left.length} người chưa xét</div>`;
+    return `<div class="lead">👑 Cái đang xét bài</div>${chip(g.dealer)}` + (left.includes(me) ? `<div class="lead">⏳ Chờ cái xét bạn...</div>` : "");
   }
   const waiting = roundPlayers(g).filter(p => !g.hands[p].done);
   const mine = waiting.includes(me) ? `<div class="myturn">🔔 Tới lượt bạn!</div>` : "";
@@ -717,14 +887,16 @@ function turnHtml(g) {
 }
 
 // +/- points floating up from each seat when a round ends
-let floatRound = null;
+const floated = new Set();
 function spawnFloats(g) {
-  if (g.phase !== "result") return;
-  if (floatRound === null) { floatRound = g.round; return; }   // just joined → don't replay an old round
-  if (floatRound === g.round) return;
-  floatRound = g.round;
+  const due = Object.entries(g.results || {}).filter(([p]) => g.phase === "result" || p !== g.dealer);
+  if (!gameRendered) { due.forEach(([p]) => floated.add(g.round + ":" + p)); return; }   // joined mid-round → no replay
+  if (dealing()) return;                                     // wait until the cards have landed
   const box = $("#floats");
-  for (const [p, r] of Object.entries(g.results)) {
+  for (const [p, r] of due) {
+    const k = g.round + ":" + p;
+    if (floated.has(k)) continue;
+    floated.add(k);
     const seat = document.querySelector(`.seat[data-p="${CSS.escape(p)}"]`);
     if (!seat) continue;
     const el = document.createElement("div");
@@ -738,6 +910,7 @@ function spawnFloats(g) {
 
 function render() {
   if (!G || !me) return;
+  trackDeal(G);
   const g = G;
   const inHand = Object.keys(g.hands);
   const watchers = Object.keys(PLAYERS).filter(p => online(p) && !inHand.includes(p) && p !== g.dealer);
@@ -753,10 +926,11 @@ function render() {
     status = `Ván #${g.round}`;
     if (isD) {
       if (allDone(g)) {
-        const pts = score(h.cards);
+        const pts = score(h.cards), n = unrevealed(g).length;
         btns = `<button data-a="hit" ${h.cards.length >= RULES.MAX_CARDS ? "disabled" : ""}>Rút bài</button>
-                <button data-a="stand" ${pts < RULES.DEALER_MIN ? "disabled" : ""}>Lật bài, tính tiền</button>`;
-        if (pts < RULES.DEALER_MIN) hint = `Cái cần ít nhất ${RULES.DEALER_MIN} điểm mới được lật.`;
+                <button data-a="stand" ${pts < RULES.DEALER_MIN ? "disabled" : ""}>Lật hết (${n})</button>`;
+        hint = pts < RULES.DEALER_MIN ? `Cái cần ít nhất ${RULES.DEALER_MIN} điểm mới được xét.`
+          : "Bấm 🔍 Xét trên từng người để so ngay, rút thêm rồi xét tiếp, hoặc Lật hết.";
       } else {
         btns = `<button class="sec" data-a="forceAll">Ép tất cả dằn</button>`;
         hint = "Chờ người chơi rút xong. Ai treo máy thì bấm Ép tất cả dằn (dưới 16 = non, thua).";
@@ -765,7 +939,7 @@ function render() {
       const pts = score(h.cards);
       btns = `<button data-a="hit">Rút bài</button><button data-a="stand" ${pts < RULES.PLAYER_MIN ? "disabled" : ""}>Dằn</button>`;
       if (pts < RULES.PLAYER_MIN) hint = `Chưa đủ ${RULES.PLAYER_MIN} điểm, phải rút thêm.`;
-    } else if (h) hint = "Đã dằn, chờ cái lật bài.";
+    } else if (h) hint = h.revealed ? "Bạn đã được xét, chờ cái xét những người còn lại." : allDone(g) ? "" : "Đã dằn, chờ mọi người rút xong.";
     else hint = "Ván đang chơi, bạn vào từ ván sau nhé.";
   } else {
     status = g.phase === "result" ? `Kết quả ván #${g.round}` : `Chờ đặt cược · ${readyN} người sẵn sàng`;
@@ -783,10 +957,16 @@ function render() {
     }
     if (g.phase === "result") btns += `<button class="sec" data-a="next">Dọn bàn</button>`;
   }
+  if (dealing()) { btns = ""; hint = ""; }
   $("#status").innerHTML = status;
   $("#turn").innerHTML = turnHtml(g);
+  if (!$("#setModal").hidden) {            // keep panel in sync without wiping half-edited rule choices
+    renderSettingsRound();
+    const sv = document.querySelector('[data-sact="saveRules"]'); if (sv) sv.disabled = g.phase === "playing";
+  }
   placeActions();
   spawnFloats(g);
+  gameRendered = true;
   $("#btns").innerHTML = btns;
   $("#hint").textContent = hint;
 
@@ -819,7 +999,8 @@ function renderChat(v) {
     const m = v[k], t = new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (m.type === "close") return `<div class="closing">${esc(m.text)}</div>`;
     if (!m.name) return `<div class="sys">${esc(m.text)}</div>`;
-    return `<div class="msg">${avaHtml(PLAYERS[m.pid]?.ava, "sm")}<div><span class="t">${t}</span><b>${esc(m.name)}:</b> ${esc(m.text)}</div></div>`;
+    const adm = isAdminPid(m.pid);
+    return `<div class="msg">${avaHtml(PLAYERS[m.pid]?.ava, "sm" + (adm ? " admava" : ""))}<div><span class="t">${t}</span><b class="${adm ? "admname" : ""}">${esc(m.name)}</b>${admBadge(m.pid)}<b>:</b> ${esc(m.text)}</div></div>`;
   }).join("");
   if (atBottom) box.scrollTop = box.scrollHeight;
 }
@@ -845,6 +1026,95 @@ function openSheet(which) {
   }
 }
 
+// =====================================================================
+// ⚙️ OWNER / ADMIN PANEL
+// =====================================================================
+function openSettings() {
+  if (!canManage()) return;
+  renderSettingsRules(); renderSettingsRound(); renderSettingsAdmin();
+  $("#setModal").hidden = false;
+  renderSettingsPlayers();
+}
+function renderSettingsRules() {
+  const r = G?.rules || {}, M = { ...DEFAULT_RULES.MULT, ...(r.mult || {}) }, playing = G?.phase === "playing";
+  const sel = (id, v, a, b) => `<select id="${id}">${Array.from({ length: b - a + 1 }, (_, i) => a + i).map(n => `<option ${n == v ? "selected" : ""}>${n}</option>`).join("")}</select>`;
+  $("#setRules").innerHTML = `<div class="rgrid">
+      <label>🔥 Xì bàn ăn/thua ×</label>${sel("rXiban", M.xiban, 1, 5)}
+      <label>⭐ Xì dách ăn/thua ×</label>${sel("rXidach", M.xidach, 1, 5)}
+      <label>✨ Ngũ linh ăn/thua ×</label>${sel("rNgulinh", M.ngulinh, 1, 5)}
+      <label>Người chơi được dằn từ</label>${sel("rPmin", r.playerMin ?? DEFAULT_RULES.PLAYER_MIN, 12, 18)}
+      <label>Nhà cái được lật từ</label>${sel("rDmin", r.dealerMin ?? DEFAULT_RULES.DEALER_MIN, 12, 18)}
+    </div>
+    <div style="margin-top:8px"><button data-sact="saveRules" ${playing ? "disabled" : ""}>💾 Lưu luật</button>
+    ${playing ? '<span class="hint" style="display:inline">  Hết ván mới đổi được.</span>' : ""}</div>`;
+}
+function renderSettingsRound() {
+  $("#setRound").innerHTML = G?.phase === "playing"
+    ? `<div class="row2"><button data-sact="forceReveal">⏩ Ép lật bài ngay</button><button class="danger" data-sact="cancelRound">✖ Hủy ván</button></div>
+       <div class="hint" style="text-align:left">Ép lật: ai chưa dằn coi như dằn (dưới ${RULES.PLAYER_MIN} = non, thua), cái lật luôn bài hiện tại. Hủy ván: không ai mất điểm.</div>`
+    : `<div class="hint" style="text-align:left">Không có ván nào đang chơi.</div>`;
+}
+function renderSettingsPlayers() {
+  const f = document.activeElement;
+  if ($("#setModal").hidden || (f?.tagName === "INPUT" && $("#setPlayers").contains(f))) return;   // don't wipe a points edit
+  const ids = [...new Set([...Object.keys(PLAYERS), ...Object.keys(KICKED)])].filter(p => p !== me || IS_ADMIN)
+    .sort((a, b) => (PLAYERS[b]?.online ? 1 : 0) - (PLAYERS[a]?.online ? 1 : 0));
+  $("#setPlayers").innerHTML = ids.map(p => {
+    const o = PLAYERS[p] || {}, isBanned = bannedBy(ADMIN.bans, p, null);
+    const kickBtn = p === me ? "" : KICKED[p] ? `<button class="sec" data-sact="unkick">Bỏ kick</button>`
+      : (isAdminPid(p) && !IS_ADMIN) ? "" : `<button class="danger" data-sact="kick">Kick</button>`;
+    const banBtn = !IS_ADMIN || p === me ? "" : isBanned ? `<button class="sec" data-sact="unban">Bỏ cấm</button>` : `<button class="danger" data-sact="ban">Cấm</button>`;
+    const pts = IS_ADMIN ? `<span class="ptsBox"><input class="ptsIn" type="number" value="${G?.balances?.[p] ?? 0}"><button class="sec" data-sact="pts">Sửa điểm</button></span>` : "";
+    return `<div class="prow" data-p="${esc(p)}">${avaHtml(o.ava, "sm")}<span class="dot ${o.online ? "on" : ""}"></span><b>${esc(o.name || nameOf(p))}</b>${admBadge(p)}
+      ${KICKED[p] ? '<span class="badge">đã kick</span>' : ""}${isBanned ? '<span class="badge">bị cấm</span>' : ""}<span class="sp"></span>${kickBtn}${banBtn}${pts}</div>`;
+  }).join("") || `<div class="hint" style="text-align:left">Chưa có ai khác trong bàn.</div>`;
+}
+function renderSettingsAdmin() {
+  $("#setAdmin").innerHTML = IS_ADMIN ? `<div class="sec-t">👑 Admin</div>
+    <div class="row2"><input id="annIn" maxlength="120" placeholder="Thông báo cho cả sảnh..."><button data-sact="announce">Gửi</button></div>
+    <div style="margin-top:6px"><button class="sec" data-sact="annClear">Gỡ thông báo</button></div>` : "";
+}
+async function kickPlayer(p, quiet) {
+  const name = nameOf(p);
+  await A.removeFromGame(p);
+  await api.set(`rooms/${room}/kicked/${p}`, true);
+  await api.update(`rooms/${room}/players/${p}`, { online: false });
+  await api.update(`lobby/${room}/online`, { [p]: null });
+  if (!quiet) say(`🦶 ${name} đã bị ${myName} mời ra khỏi bàn`);
+}
+$("#setModal").addEventListener("click", async e => {
+  const b = e.target.closest("[data-sact]");
+  if (!b || !canManage()) return;
+  const a = b.dataset.sact, row = b.closest(".prow"), p = row?.dataset.p, name = p && nameOf(p);
+  if (a === "saveRules") {
+    const v = id => +$("#" + id).value;
+    const r = { mult: { xiban: v("rXiban"), xidach: v("rXidach"), ngulinh: v("rNgulinh") }, playerMin: v("rPmin"), dealerMin: v("rDmin") };
+    await A.saveRules(r);
+    say(`⚙️ ${myName} đổi luật: xì bàn ×${r.mult.xiban}, xì dách ×${r.mult.xidach}, ngũ linh ×${r.mult.ngulinh}, dằn từ ${r.playerMin}, cái lật từ ${r.dealerMin}`);
+    toast("Đã lưu luật bàn");
+  }
+  if (a === "forceReveal" && confirm("Ép lật bài và tính điểm ngay?")) { const n = G.round; await A.forceReveal(); say(`⏩ ${myName} ép lật bài ván #${n}`); $("#setModal").hidden = true; }
+  if (a === "cancelRound" && confirm("Hủy ván này, không tính điểm?")) { const n = G.round; await A.cancelRound(); say(`✖ ${myName} hủy ván #${n} (không tính điểm)`); $("#setModal").hidden = true; }
+  if (a === "kick" && confirm(`Kick ${name} ra khỏi bàn?`)) { await kickPlayer(p); renderSettingsRound(); }
+  if (a === "unkick") { await api.set(`rooms/${room}/kicked/${p}`, null); toast(`${name} vào lại được rồi`); }
+  if (!IS_ADMIN) return;
+  if (a === "ban" && confirm(`Cấm ${name} khỏi toàn bộ game?`)) {
+    try { await api.set(`admin/bans/${p}`, { name, dev: PLAYERS[p]?.dev || "", ts: Date.now() }); } catch { return rulesWarn(); }
+    await kickPlayer(p, true); say(`🚫 Admin đã cấm ${name}`);
+  }
+  if (a === "unban") { try { await api.set(`admin/bans/${p}`, null); toast(`Đã bỏ cấm ${name}`); } catch { rulesWarn(); } }
+  if (a === "pts") {
+    const n = Math.round(+row.querySelector(".ptsIn").value);
+    if (G?.phase === "playing") return toast("Hết ván mới sửa điểm được");
+    await A.setPoints(p, n); say(`✏️ Admin sửa điểm ${name} thành ${fmt(n)}`); toast("Đã sửa điểm");
+  }
+  if (a === "announce") {
+    const text = $("#annIn").value.trim(); if (!text) return;
+    try { await api.set("admin/announce", { text, by: myName, ts: Date.now() }); $("#annIn").value = ""; toast("Đã gửi thông báo"); } catch { rulesWarn(); }
+  }
+  if (a === "annClear") { try { await api.set("admin/announce", null); } catch { rulesWarn(); } }
+});
+
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 2200); }
 const say = text => api.push(`rooms/${room}/chat`, { name: "", text, ts: Date.now() });
 
@@ -855,6 +1125,48 @@ const say = text => api.push(`rooms/${room}/chat`, { name: "", text, ts: Date.no
 // LOBBY: lobby/<roomId> = { meta: {name, passHash, owner, ownerName, createdAt}, online: {pid: {name, ava}} }
 // =====================================================================
 let LOBBY = {}, lobbyVal = null, pendingRoom = null;
+let IS_ADMIN = false, AUTH_USER = null, ADMIN = {}, ADMIN_PID = null, ROOM_META = null, KICKED = {};
+const devStore = USE_FIREBASE ? localStorage : sessionStorage;   // test mode: every tab acts like its own phone
+const myDev = devStore.xd_dev || (devStore.xd_dev = Math.random().toString(36).slice(2, 10));
+const sameEmail = e => !!e && !!ADMIN_EMAIL && e.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+const authReady = new Promise(res => authApi.onChange(u => {
+  AUTH_USER = u;
+  IS_ADMIN = !!u && (USE_FIREBASE ? sameEmail(u.email) : true);
+  updateAdminUi(); res();
+}));
+const canManage = () => IS_ADMIN || (!!ROOM_META && ROOM_META.owner === me);
+const bannedBy = (bans, pid, dev) => !!bans?.[pid] || Object.values(bans || {}).some(b => b && dev && b.dev === dev);
+const rulesWarn = () => toast("⚠️ Firebase chặn ghi: kiểm tra lại Rules cho mục admin");
+
+function bootOut(msg, toLogin) {
+  sessionStorage.xd_msg = msg;
+  if (toLogin) delete sessionStorage.xd_in;
+  location.href = location.pathname;
+}
+function updateAdminUi() {
+  $("#adminLogin").textContent = IS_ADMIN ? "👑 Đăng xuất admin" : "👑 Đăng nhập admin";
+  $("#adminLogin").hidden = USE_FIREBASE && !ADMIN_EMAIL && !IS_ADMIN;     // hidden until ADMIN_EMAIL is filled in
+  if (IS_ADMIN) $("#adminNote").textContent = `Đang là admin (${AUTH_USER?.email || ""})`;
+  $("#lobbyAdmin").hidden = !IS_ADMIN;
+  $("#setBtn").hidden = !canManage();
+}
+function watchAdmin() {
+  api.on("admin", v => {
+    ADMIN = v || {}; ADMIN_PID = ADMIN.pid || null;
+    if (me && !IS_ADMIN && bannedBy(ADMIN.bans, me, myDev)) return bootOut("🚫 Bạn đã bị admin cấm chơi.", true);
+    renderAnnounce();
+    if (G) render();
+    if (CHAT) renderChat(CHAT);
+    if (!$("#lobby").hidden) renderLobby();
+    renderSettingsPlayers();
+  });
+}
+function renderAnnounce() {
+  const a = ADMIN.announce, el = $("#announce");
+  if (!a?.text || Date.now() - a.ts > 3 * 3600e3 || sessionStorage.xd_ann === String(a.ts)) { el.hidden = true; return; }
+  $("#annText").innerHTML = `📢 <b>${esc(a.by || "Admin")}</b>: ${esc(a.text)}`;
+  el.hidden = false;
+}
 
 // Small non-reversible hash so the password isn't stored as plain text (friend-level protection only)
 function hashPass(str) {
@@ -873,21 +1185,21 @@ function setIdentity(name) {
 
 function enterLobby() {
   $("#login").hidden = true; $("#game").hidden = true; $("#lobby").hidden = false;
-  $("#lobbyMe").innerHTML = avaHtml(myAva) + esc(myName);
+  $("#lobbyMe").innerHTML = avaHtml(myAva, IS_ADMIN ? "admava" : "") + esc(myName) + (IS_ADMIN ? ' <span class="badge adm">ADMIN</span>' : "");
   history.replaceState(null, "", location.pathname);
   api.on("lobby", v => { LOBBY = v || {}; renderLobby(); });
 }
 
 function renderLobby() {
-  const list = Object.entries(LOBBY).filter(([, t]) => t && t.meta).map(([id, t]) => ({ id, ...t.meta, online: Object.values(t.online || {}) }))
+  const list = Object.entries(LOBBY).filter(([, t]) => t && t.meta).map(([id, t]) => ({ id, ...t.meta, online: Object.entries(t.online || {}).map(([pid, o]) => ({ pid, ...o })) }))
     .sort((a, b) => b.online.length - a.online.length || (b.createdAt || 0) - (a.createdAt || 0));
   $("#tables").innerHTML = list.length ? list.map(t => `
     <div class="tcard ${t.online.length ? "" : "empty"}" data-room="${esc(t.id)}">
       <div class="count ${t.online.length ? "live" : ""}">${t.online.length ? "🟢 " + t.online.length + " người" : "Trống"}</div>
       <div class="tname">${t.passHash ? "🔒" : "🃏"}<span>${esc(t.name)}</span></div>
-      <div class="avas">${t.online.slice(0, 10).map(o => avaHtml(o.ava)).join("")}${t.online.length > 10 ? `<span class="label">+${t.online.length - 10}</span>` : ""}</div>
+      <div class="avas">${t.online.slice(0, 10).map(o => avaHtml(o.ava, isAdminPid(o.pid) ? "admava" : "")).join("")}${t.online.length > 10 ? `<span class="label">+${t.online.length - 10}</span>` : ""}</div>
       <div class="meta"><span>Chủ bàn: ${esc(t.ownerName || "?")}</span>
-        <span>${!t.online.length && t.owner === me ? `<button class="del" data-del="${esc(t.id)}" title="Xóa bàn">🗑</button> ` : ""}<button class="go">Vào bàn</button></span></div>
+        <span>${IS_ADMIN || (!t.online.length && t.owner === me) ? `<button class="del" data-del="${esc(t.id)}" title="Xóa bàn">🗑</button> ` : ""}<button class="go">Vào bàn</button></span></div>
     </div>`).join("")
     : `<div class="noTables">Chưa có bàn nào.<br>Bấm <b>＋ Tạo bàn</b> để mở bàn đầu tiên nhé!</div>`;
 }
@@ -923,7 +1235,9 @@ async function join(roomId) {
     meta = { name: room, passHash: "", owner: me, ownerName: myName, createdAt: Date.now() };
     await api.set(`lobby/${room}/meta`, meta);
   }
-  if (!passOk(room, meta)) { enterLobby(); LOBBY[room] = { meta }; return tryRoom(room); }
+  if (!passOk(room, meta) && !IS_ADMIN) { enterLobby(); LOBBY[room] = { meta }; return tryRoom(room); }
+  if (!IS_ADMIN && await api.get(`rooms/${room}/kicked/${me}`)) { enterLobby(); return toast("🦶 Bạn đã bị mời ra khỏi bàn này"); }
+  ROOM_META = meta;
 
   const existing = await api.get(`rooms/${room}/players/${me}`);
   if (existing?.online && existing.sid !== sid && !confirm(`"${myName}" đang online ở chỗ khác. Vẫn vào bằng tên này?`)) { room = ""; return enterLobby(); }
@@ -932,10 +1246,16 @@ async function join(roomId) {
   document.body.classList.add("in-game");
   $("#roomName").textContent = (meta.passHash ? "🔒 " : "") + meta.name; $("#meName").textContent = myName;
 
-  api.on(gamePath, v => { G = v ? norm(v) : null; if (G && floatRound === null && G.phase !== "result") floatRound = G.round; render(); });
-  api.on(`rooms/${room}/players`, v => { PLAYERS = v || {}; render(); if (CHAT) renderChat(CHAT); });
+  api.on(gamePath, v => { G = v ? norm(v) : null; render(); });
+  api.on(`rooms/${room}/players`, v => { PLAYERS = v || {}; render(); if (CHAT) renderChat(CHAT); renderSettingsPlayers(); });
   api.on(`rooms/${room}/chat`, renderChat, 80);
-  presenceVal = { name: myName, online: true, sid, ava: myAva };
+  api.on(`lobby/${room}/meta`, v => { if (v) ROOM_META = v; updateAdminUi(); });
+  api.on(`rooms/${room}/kicked`, v => {
+    KICKED = v || {};
+    if (KICKED[me] && !IS_ADMIN) return bootOut(`🦶 Bạn đã bị mời ra khỏi bàn ${ROOM_META?.name || ""}`, false);
+    renderSettingsPlayers();
+  });
+  presenceVal = { name: myName, online: true, sid, ava: myAva, dev: myDev };
   api.presence(`rooms/${room}/players/${me}`, presenceVal, { online: false });
   lobbyVal = { name: myName, ava: myAva };
   api.presence(`lobby/${room}/online`, { [me]: lobbyVal }, { [me]: null });
@@ -951,12 +1271,23 @@ $("#modeNote").innerHTML = USE_FIREBASE
   : "🧪 <b>Chế độ thử</b> (chưa có Firebase): mở nhiều tab trên cùng máy, mỗi tab một nickname để test.";
 $("#nick").value = localStorage.xd_nick || "";
 const qr = new URLSearchParams(location.search).get("r");
-function start() {
+async function start() {
   const name = $("#nick").value.trim();
   if (!name) return toast("Nhập nickname đã bệ hạ ơi");
+  await authReady;
+  const pid = "u_" + keyify(name);
+  let adm = {};
+  try { adm = (await api.get("admin")) || {}; } catch { /* admin not set up in Rules yet */ }
+  ADMIN = adm; ADMIN_PID = adm.pid || null;
+  if (!IS_ADMIN && bannedBy(adm.bans, pid, myDev)) { delete sessionStorage.xd_in; return toast("🚫 Bạn đã bị admin cấm chơi."); }
+  if (!IS_ADMIN && adm.pid === pid) { delete sessionStorage.xd_in; return toast("Nickname này là của admin, chọn tên khác nhé"); }
   setIdentity(name);
+  if (IS_ADMIN && adm.pid !== me) { api.set("admin/pid", me).then(() => {}, rulesWarn); ADMIN_PID = me; }
+  watchAdmin();
+  renderAnnounce();
   qr ? join(keyify(qr)) : enterLobby();
 }
+if (sessionStorage.xd_msg) { const m = sessionStorage.xd_msg; delete sessionStorage.xd_msg; setTimeout(() => toast(m), 400); }
 $("#joinBtn").onclick = start;
 $("#nick").addEventListener("keydown", e => e.key === "Enter" && start());
 if (sessionStorage.xd_in && localStorage.xd_nick) start();     // already logged in this tab → skip the login screen
@@ -984,6 +1315,21 @@ $("#passOk").onclick = () => {
 };
 $("#passInput").addEventListener("keydown", e => e.key === "Enter" && $("#passOk").click());
 document.querySelectorAll(".modal [data-close]").forEach(b => b.onclick = () => b.closest(".modal").hidden = true);
+$("#adminLogin").onclick = async () => {
+  if (IS_ADMIN) return authApi.logout().then(() => { $("#adminNote").textContent = "Đã đăng xuất admin"; });
+  try {
+    const r = await authApi.login();
+    const em = r?.user?.email;
+    if (USE_FIREBASE && em && !sameEmail(em)) {
+      $("#adminNote").textContent = ADMIN_EMAIL ? `Tài khoản ${em} không phải admin.` : `Đã đăng nhập ${em} — điền email này vào ADMIN_EMAIL trong code.`;
+      authApi.logout();
+    }
+  } catch (err) { toast("Đăng nhập lỗi: " + (err.code || err.message)); }
+};
+$("#lobbyAdmin").onclick = () => authApi.logout().then(() => location.reload());
+$("#annClose").onclick = () => { sessionStorage.xd_ann = String(ADMIN.announce?.ts); $("#announce").hidden = true; };
+$("#setBtn").onclick = openSettings;
+
 $("#lobbyAva").onclick = () => { renderPickers(); $("#avaModal").hidden = false; };
 $("#lobbyNick").onclick = () => { delete sessionStorage.xd_in; location.href = location.pathname; };
 
@@ -999,6 +1345,11 @@ document.addEventListener("click", e => {
       closingText = null;
     }
   });
+});
+
+document.addEventListener("click", e => {
+  const x = e.target.closest("[data-xet]");
+  if (x) { x.disabled = true; A.xet(x.dataset.xet); }
 });
 
 // Avatar picker events (login screen + in-game modal)
